@@ -1,8 +1,10 @@
 from fastapi import FastAPI
-from app.api.line_response import router as line_router
+from api.app.services.client.response_client import router as client_router
+from api.app.services.business.response_business import router as business_router
 
 app = FastAPI()
-app.include_router(line_router)
+app.include_router(client_router)
+app.include_router(business_router)
 
 if __name__ == "__main__":
     import uvicorn

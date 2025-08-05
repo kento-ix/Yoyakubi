@@ -7,8 +7,8 @@ from app.core.config import settings
 
 router = APIRouter()
 
-line_bot_api = LineBotApi(settings.line_channel_access_token)
-handler = WebhookHandler(settings.line_channel_secret)
+client_line_api = LineBotApi(settings.line_client_channel_access_token)
+handler = WebhookHandler(settings.line_client_channel_secret)
 
 # ユーザーの状態管理用（簡易）
 user_states = {}

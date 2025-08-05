@@ -1,0 +1,10 @@
+fastapi
+line-bot-sdk
+pydantic-settings
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+sqlalchemy
+psycopg2-binary
+uvicorn
+requests
