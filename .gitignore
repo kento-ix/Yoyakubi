@@ -12,3 +12,5 @@ __pycache__/
 .DS_Store
 
 .pytest_cache/
+
+api/google-calendar-credentials.json
