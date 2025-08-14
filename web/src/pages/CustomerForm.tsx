@@ -18,28 +18,17 @@ import {
 import { DateInput } from '@mantine/dates';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle } from '@tabler/icons-react';
-import axios from 'axios';
-
-// Customer form interface
-interface CustomerForm {
-  lastName: string;
-  firstName: string;
-  lastNameKana: string;
-  firstNameKana: string;
-  phone: string;
-  email: string;
-  birthday: Date | null;
-  birthdayYear?: string;
-  birthdayMonth?: string;
-  birthdayDay?: string;
-}
+import { useAtom } from 'jotai';
+import type { CustomerForm } from '../types/customer';
+import { checkExistingUser, createCustomer } from '../services/customerService';
+import { checkingUserAtom, customerErrorAtom } from '../atoms/customerAtom';
 
 const CustomerFormPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [checkingUser, setCheckingUser] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [checkingUser, setCheckingUser] = useAtom(checkingUserAtom);
+  const [error, setError] = useAtom(customerErrorAtom);
   
   // Mobile detection
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -125,7 +114,7 @@ const CustomerFormPage: React.FC = () => {
 
   // Check if user already exists
   useEffect(() => {
-    const checkExistingUser = async () => {
+    const checkUser = async () => {
       if (!lineUserId) {
         setError('LINE User IDが見つかりません');
         setCheckingUser(false);
@@ -133,8 +122,8 @@ const CustomerFormPage: React.FC = () => {
       }
 
       try {
-        const response = await axios.get(`/api/customers/check/${lineUserId}`);
-        if (response.data.exists) {
+        const response = await checkExistingUser(lineUserId);
+        if (response.exists) {
           navigate('/menu');
           return;
         }
@@ -145,8 +134,8 @@ const CustomerFormPage: React.FC = () => {
       }
     };
 
-    checkExistingUser();
-  }, [lineUserId, navigate]);
+    checkUser();
+  }, [lineUserId, navigate, setCheckingUser, setError]);
 
   // Handle form submission
   const handleSubmit = async (values: CustomerForm) => {
@@ -176,7 +165,7 @@ const CustomerFormPage: React.FC = () => {
         birthday: birthdayString
       };
 
-      await axios.post('/api/customers', customerData);
+      await createCustomer(customerData);
       navigate('/menu');
     } catch (err) {
       console.error('Error creating customer:', err);
