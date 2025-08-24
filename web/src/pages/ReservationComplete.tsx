@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Paper,
   Title,
   Text,
   Stack,
@@ -17,9 +16,7 @@ import {
 import { 
   IconCheck,
   IconCalendar, 
-  IconClock, 
-  IconUser, 
-  IconPhone, 
+  IconClock,  
   IconMail,
   IconHome,
   IconDownload

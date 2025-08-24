@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Paper,
@@ -7,13 +7,12 @@ import {
   Stack,
   Group,
   Button,
-  Container,
   Badge,
   Box,
   ScrollArea,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconCalendar, IconClock, IconChevronRight } from "@tabler/icons-react";
+import { IconCalendar, IconChevronRight } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import {
   weekStartDateAtom,
@@ -22,7 +21,6 @@ import {
   selectedTimeAtom,
 } from "../atoms/dateAtom";
 import { selectedServiceAtom } from "../atoms/serviceAtom";
-import type { TimeSlot } from "../types/date";
 
 const DateTimeSelection: React.FC = () => {
   const navigate = useNavigate();
@@ -210,10 +208,7 @@ const DateTimeSelection: React.FC = () => {
     })}`;
   };
 
-  const totalPrice = selectedServices.reduce(
-    (acc, service) => acc + service.price,
-    0
-  );
+  
 
   return (
     <>

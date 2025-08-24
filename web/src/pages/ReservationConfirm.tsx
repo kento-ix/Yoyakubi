@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Paper,
   Title,
   Text,
   Stack,
@@ -12,7 +11,6 @@ import {
   Divider,
   Badge,
   Alert,
-  Loader,
   Center
 } from '@mantine/core';
 import { 
