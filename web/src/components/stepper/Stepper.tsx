@@ -2,6 +2,9 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Stepper, Button, Group, Container, Stack } from "@mantine/core";
 import { IconUser, IconCalendar, IconCheck, IconPaperclip } from '@tabler/icons-react';
+import { useAtomValue } from "jotai";
+import { selectedServiceAtom } from "../../atoms/serviceAtom";
+import { selectedDateAtom, selectedTimeAtom } from "../../atoms/dateAtom";
 
 interface StepperComponentProps {
   children: React.ReactNode;
@@ -10,36 +13,19 @@ interface StepperComponentProps {
 const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  // get selected status
+  const selectedService = useAtomValue(selectedServiceAtom);
+  const selectedDate = useAtomValue(selectedDateAtom);
+  const selectedTime = useAtomValue(selectedTimeAtom);
 
-  // ルートパスとステップの対応
+
   const stepRoutes = [
-    {
-      path: "/menu",
-      step: 0,
-      label: "メニュー選択",
-      icon: <IconUser size={24} />,
-    },
-    {
-      path: "/datetime",
-      step: 1,
-      label: "日時選択",
-      icon: <IconCalendar size={24} />,
-    },
-    { 
-      path: "/confirm",
-      step: 2,
-      label: "予約確認",
-      icon: <IconCheck size={24} />,
-    },
-    {
-      path: "/complete",
-      step: 3,
-      label: "予約完了",
-      icon: <IconPaperclip size={24} />,
-    },
+    { path: "/menu", step: 0, label: "メニュー選択", icon: <IconUser size={24} /> },
+    { path: "/datetime", step: 1, label: "日時選択", icon: <IconCalendar size={24} /> },
+    { path: "/confirm", step: 2, label: "予約確認", icon: <IconCheck size={24} /> },
+    { path: "/complete", step: 3, label: "予約完了", icon: <IconPaperclip size={24} /> },
   ];
 
-  // 現在のステップを取得
   const getCurrentStep = () => {
     const currentRoute = stepRoutes.find(
       (route) => route.path === location.pathname
@@ -47,7 +33,6 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
     return currentRoute ? currentRoute.step : 0;
   };
 
-  // 前のステップに戻る
   const handlePrevStep = () => {
     const currentStep = getCurrentStep();
     if (currentStep > 0) {
@@ -56,7 +41,6 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
     }
   };
 
-  // 次のステップに進む
   const handleNextStep = () => {
     const currentStep = getCurrentStep();
     if (currentStep < stepRoutes.length - 1) {
@@ -65,7 +49,6 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
     }
   };
 
-  // ステップクリック時の処理
   const handleStepClick = (stepIndex: number) => {
     const targetRoute = stepRoutes[stepIndex];
     if (targetRoute) {
@@ -80,7 +63,6 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
   return (
     <Container size="lg" py="xl">
       <Stack gap="xl">
-        {/* ステッパー表示 */}
         <Stepper
           active={currentStep}
           onStepClick={handleStepClick}
@@ -106,10 +88,8 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
           <Stepper.Completed>予約が完了しました！</Stepper.Completed>
         </Stepper>
 
-        {/* ページコンテンツ */}
         <div>{children}</div>
 
-        {/* ナビゲーションボタン - 完了ページでは非表示 */}
         {currentStep < 3 && (
           <Group justify="space-between" mt="xl">
             <Button
@@ -122,7 +102,11 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
             <Button
               onClick={handleNextStep}
               color="pink"
-              disabled={currentStep === 2}
+              disabled={
+                (currentStep === 0 && (!selectedService || selectedService.length === 0)) || // menu step
+                (currentStep === 1 && (!selectedDate || !selectedTime)) ||                    // datetime step
+                currentStep === 2 
+              }
             >
               次へ
             </Button>

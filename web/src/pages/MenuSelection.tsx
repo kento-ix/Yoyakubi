@@ -11,7 +11,6 @@ import {
     Group,
     Badge,
     SimpleGrid,
-    Container,
     Collapse,
     Button,
     Divider
@@ -72,7 +71,8 @@ const MenuSelection: React.FC = () => {
     const categories = ['ハンド', 'フット', 'オプション'];
 
     return (
-        <Container size="md">
+        <>
+        {/* <Container size="md"> */}
             <Stack gap="lg">
                 <div>
                     <Title order={2} ta="center" c="pink.6" mb="xs">
@@ -93,14 +93,14 @@ const MenuSelection: React.FC = () => {
                             style={{ cursor: 'pointer' }}
                             onClick={() => toggleCategory(category)}
                         >
-                            <Group gap="sm">
+                            <Stack gap="sm">
                                 <Badge color={getCategoryColor(category)} size="lg" variant="filled">
                                     {category}
                                 </Badge>
                                 <Text fw={600} size="lg">
                                     {category}メニュー
                                 </Text>
-                            </Group>
+                            </Stack>
                             {openCategories[category] ? (
                                 <IconChevronUp size={20} />
                             ) : (
@@ -207,7 +207,8 @@ const MenuSelection: React.FC = () => {
                     </Paper>
                 )}
             </Stack>
-        </Container>
+        {/* </Container> */}
+        </>
     );
 };
 

@@ -8,6 +8,8 @@ import ReservationConfirm from "./pages/ReservationConfirm";
 import ReservationComplete from "./pages/ReservationComplete";
 import StepperComponent from "./components/stepper/Stepper";
 
+import Calendar from "./pages/Calendar";
+
 function App() {
   return (
     <Router>
@@ -17,7 +19,8 @@ function App() {
           path="/"
           element={
             <StepperComponent>
-              <MenuSelection />
+              <Calendar/>
+              {/* <MenuSelection /> */}
             </StepperComponent>
           }
         />
