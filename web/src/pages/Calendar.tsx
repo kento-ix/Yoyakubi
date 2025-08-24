@@ -197,11 +197,11 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                     style={{
                       cursor:
                         status === "available" ? "pointer" : "not-allowed",
-                      height: 40,
+                      height: 50,
                       textAlign: "center",
                       verticalAlign: "middle",
                       backgroundColor: bg,
-                      color: "#b0b0b0",
+                      color: "#dbd8d8ff",
                       border: "1px solid #ccc",
                       fontSize: "14px",
                       userSelect: "none",
