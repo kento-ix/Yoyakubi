@@ -58,7 +58,6 @@ const StepperComponent: React.FC<StepperComponentProps> = ({ children }) => {
 
   const currentStep = getCurrentStep();
   const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === stepRoutes.length - 1;
 
   return (
     <Container size="lg" py="xl">

@@ -25,7 +25,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
   const [selectedDate, setSelectedDate] = useAtom(selectedDateAtom);
   const [selectedTime, setSelectedTime] = useAtom(selectedTimeAtom);
 
-  // 時間スロット（9:00〜18:00, 30分刻み）
   const times = Array.from({ length: 18 }, (_, i) =>
     dayjs()
       .hour(9)
@@ -34,7 +33,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
       .format("HH:mm")
   );
 
-  // 日付+時間の選択
   const handleSelect = (date: Date, time: string) => {
     if (
       unavailable?.(dayjs(date).format("YYYY-MM-DD"), time) ||
@@ -45,7 +43,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
     setSelectedTime(time);
   };
 
-  // セルの状態判定
   const getStatus = (date: Date, time: string): SlotStatus => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
     if (date.getDay() === 0 || unavailable?.(dateStr, time))
@@ -94,7 +91,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
         </Group>
       </div>
 
-      {/* テーブル */}
       <table
         style={{
           borderCollapse: "collapse",
@@ -168,7 +164,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
         <tbody>
           {times.map((time, row) => (
             <tr key={row}>
-              {/* 時間列 */}
               <td
                 style={{
                   width: "16%",
@@ -181,7 +176,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
               >
                 {time}
               </td>
-              {/* スロット列 */}
               {weekDays.map((d, col) => {
                 const status = getStatus(d.date, time);
 
@@ -189,11 +183,11 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                 let symbol: React.ReactNode = <span style={{ color: "gray" }}>○</span>;
 
                 if (status === "selected") {
-                    bg = "#f06595";
-                    symbol = <span style={{ color: "white" }}>○</span>;
+                  bg = "#f06595";
+                  symbol = <span style={{ color: "white" }}>○</span>;
                 } else if (status === "unavailable") {
-                    bg = "#cdccccff";
-                    symbol = <span style={{ color: "black" }}>✕</span>;
+                  bg = "#cdccccff";
+                  symbol = <span style={{ color: "black" }}>✕</span>;
                 }
 
                 return (
