@@ -19,8 +19,7 @@ function App() {
           path="/"
           element={
             <StepperComponent>
-              <Calendar/>
-              {/* <MenuSelection /> */}
+              <MenuSelection/>
             </StepperComponent>
           }
         />
@@ -38,7 +37,7 @@ function App() {
           path="/datetime"
           element={
             <StepperComponent>
-              <DateTimeSelection />
+              <Calendar />
             </StepperComponent>
           }
         />

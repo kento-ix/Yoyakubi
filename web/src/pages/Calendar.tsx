@@ -10,6 +10,9 @@ import {
 } from "../atoms/dateAtom";
 import { Button, Group } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
+import { selectedServiceAtom } from "../atoms/serviceAtom";
+import { Paper, Stack, Text } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
 
 dayjs.locale("ja");
 
@@ -24,6 +27,37 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
     const [weekDays] = useAtom(weekDaysAtom);
     const [selectedDate, setSelectedDate] = useAtom(selectedDateAtom);
     const [selectedTime, setSelectedTime] = useAtom(selectedTimeAtom);
+    const [selectedServices] = useAtom(selectedServiceAtom);
+    const navigate = useNavigate();
+
+    const totalDuration = selectedServices.reduce(
+        (acc, service) => acc + service.duration,
+        0
+    );
+
+    const calculateEndTime = (startTime: string, duration: number): string => {
+        const [hours, minutes] = startTime.split(":").map(Number);
+        const totalMinutes = hours * 60 + minutes + duration;
+        const endHours = Math.floor(totalMinutes / 60);
+        const endMins = totalMinutes % 60;
+        return `${endHours.toString().padStart(2, "0")}:${endMins
+        .toString()
+        .padStart(2, "0")}`;
+    };
+
+    const isSlotSelected = (date: Date, time: string) => {
+        if (!selectedDate || !selectedTime) return false;
+        const dateStr = dayjs(date).format("YYYY-MM-DD");
+        if (selectedDate !== dateStr) return false;
+
+        const [startHour, startMin] = selectedTime.split(":").map(Number);
+        const startTotal = startHour * 60 + startMin;
+
+        const [slotHour, slotMin] = time.split(":").map(Number);
+        const slotTotal = slotHour * 60 + slotMin;
+
+        return slotTotal >= startTotal && slotTotal < startTotal + totalDuration;
+    };
 
     const times = Array.from({ length: 18 }, (_, i) =>
         dayjs()
@@ -46,6 +80,25 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
         return "available";
     };
 
+    // 次へ進む処理
+    const handleNext = () => {
+        if (selectedDate && selectedTime && selectedServices.length > 0) {
+            const endTime = calculateEndTime(selectedTime, totalDuration);
+            const reservationData = {
+                date: selectedDate,
+                time: selectedTime,
+                endTime: endTime,
+                services: selectedServices,
+                totalDuration: totalDuration,
+                totalPrice: selectedServices.reduce(
+                    (acc, service) => acc + service.price,
+                    0
+                ),
+            };
+            localStorage.setItem("reservationData", JSON.stringify(reservationData));
+            navigate("/confirm");
+        }
+    };
 
     return (
         <div style={{ width: "100%", overflowX: "hidden" }}>
@@ -174,11 +227,12 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                     </td>
                     {weekDays.map((d, col) => {
                     const status = getStatus(d.date, time);
+                    const selected = isSlotSelected(d.date, time);
 
                     let bg = "#e7e6e6ff";
                     let symbol: React.ReactNode = <span style={{ color: "gray", fontSize: "21px" }}>○</span>;
 
-                    if (status === "selected") {
+                    if (selected) {
                         bg = "#ec4881ff";
                         symbol = <span style={{ color: "white", fontSize: "21px" }}>○</span>;
                     } else if (status === "unavailable") {
@@ -211,6 +265,31 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                 ))}
             </tbody>
             </table>
+
+            {selectedDate && selectedTime && (
+                <Paper p="md" mt="md" shadow="sm" radius="md" style={{ backgroundColor: "#fdecef" }}>
+                    <Stack gap="xs">
+                        <Text fw={600} c="pink.8">選択中の予約時間</Text>
+                        <Text>日付: {dayjs(selectedDate).format("YYYY年MM月DD日(ddd)")}</Text>
+                        <Text>開始時間: {selectedTime}</Text>
+                        <Text>終了時間: {calculateEndTime(selectedTime, totalDuration)}</Text>
+                        <Text>所要時間: {totalDuration}分</Text>
+                    </Stack>
+                </Paper>
+            )}
+
+            {/* 予約内容確認 → 次へ */}
+            {selectedDate && selectedTime && selectedServices.length > 0 && (
+                <Button
+                    onClick={handleNext}
+                    color="pink"
+                    size="lg"
+                    mt="md"
+                    fullWidth
+                >
+                    次へ進む
+                </Button>
+            )}
         </div>
     );
 };
