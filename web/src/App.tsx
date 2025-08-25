@@ -3,7 +3,7 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CustomerForm from "./pages/CustomerForm";
 import MenuSelection from "./pages/MenuSelection";
-import ReservationConfirm from "./pages/ReservationConfirm";
+import ReservationConfirm from "./pages/Confirm";
 import ReservationComplete from "./pages/ReservationComplete";
 import StepperComponent from "./components/stepper/Stepper";
 

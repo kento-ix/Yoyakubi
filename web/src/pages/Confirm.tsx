@@ -21,10 +21,10 @@ interface ReservationData {
 }
 
 const ReservationConfirm: React.FC = () => {
+  const navigate = useNavigate();
   const [reservationData, setReservationData] = useState<ReservationData | null>(
     null
   );
-  const navigate = useNavigate();
 
   useEffect(() => {
     const data = localStorage.getItem("reservationData");
@@ -32,6 +32,10 @@ const ReservationConfirm: React.FC = () => {
       setReservationData(JSON.parse(data));
     }
   }, []);
+
+  const handleConfirm = () => {
+    navigate("/complete");
+  };
 
   if (!reservationData) {
     return (
@@ -98,7 +102,7 @@ const ReservationConfirm: React.FC = () => {
             <Button variant="outline" color="gray" onClick={() => navigate("/datetime")}>
               戻る
             </Button>
-            <Button color="pink" onClick={() => alert("予約を確定しました！")}>
+            <Button color="pink" onClick={handleConfirm}>
               予約を確定する
             </Button>
           </Group>

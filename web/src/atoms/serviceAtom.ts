@@ -25,10 +25,9 @@ const loadInitial = (): ServiceMenu[] => {
 
 export const selectedServiceAtom = atom<ServiceMenu[]>(loadInitial());
 
-// 更新用関数 atom
 export const setSelectedServiceAtom = atom(
   null,
-  (get, set, services: ServiceMenu[]) => {
+  (_get, set, services: ServiceMenu[]) => {
     const expiresAt = Date.now() + EXPIRATION_MINUTES * 60 * 1000;
     const data: StoredServices = { services, expiresAt };
     localStorage.setItem("selectedServices", JSON.stringify(data));
