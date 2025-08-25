@@ -13,7 +13,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* テスト用: ステッパーから開始 */}
         <Route
           path="/"
           element={
@@ -23,7 +22,6 @@ function App() {
           }
         />
         <Route path="/customer-form" element={<CustomerForm />} />
-        {/* 予約フロー（ステッパー内） */}
         <Route
           path="/menu"
           element={
