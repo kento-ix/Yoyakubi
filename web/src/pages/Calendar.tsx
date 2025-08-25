@@ -177,7 +177,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
-                                    lineHeight: "1.9",
+                                    lineHeight: "2.1",
                                 }}
                             >
                                 <span
@@ -228,7 +228,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                                 const status = getStatus(d.date, time);
                                 const selected = isSlotSelected(d.date, time);
 
-                                let bg = "#e7e6e6ff";
+                                let bg = "#ffffffff";
                                 let symbol: React.ReactNode = <span style={{ color: "gray", fontSize: "21px" }}>○</span>;
 
                                 if (selected) {
