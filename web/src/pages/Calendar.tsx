@@ -178,7 +178,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                         style={{
                             display: "flex",
                             flexDirection: "column",
-                            lineHeight: "1.5",
+                            lineHeight: "1.7",
                         }}
                     >
                         <span
