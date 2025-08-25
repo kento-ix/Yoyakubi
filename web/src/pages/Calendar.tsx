@@ -110,160 +110,159 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                 marginBottom: 8,
             }}
             >
-            <div style={{ textAlign: "center", fontWeight: 500 }}>
-                {dayjs(weekDays[0].date).format("YYYY/MM/DD")} -{" "}
-                {dayjs(weekDays[6].date).format("MM/DD")}
-            </div>
+                <div style={{ textAlign: "center", fontWeight: 500 }}>
+                    {dayjs(weekDays[0].date).format("YYYY/MM/DD")} -{" "}
+                    {dayjs(weekDays[6].date).format("MM/DD")}
+                </div>
 
-            <Group justify="center" gap="xs">
-                <Button
-                variant="light"
-                color="pink"
-                size="sm"
-                onClick={() =>
-                    setWeekStartDate(dayjs(weekStartDate).subtract(7, "day").toDate())
-                }
-                >
-                前の1週間
-                </Button>
-                <Button
-                variant="light"
-                color="pink"
-                size="sm"
-                rightSection={<IconChevronRight size={16} />}
-                onClick={() =>
-                    setWeekStartDate(dayjs(weekStartDate).add(7, "day").toDate())
-                }
-                >
-                次の1週間
-                </Button>
-            </Group>
+                <Group justify="center" gap="xs">
+                    <Button
+                        variant="light"
+                        color="pink"
+                        size="sm"
+                        onClick={() =>
+                            setWeekStartDate(dayjs(weekStartDate).subtract(7, "day").toDate())
+                        }
+                    >
+                    前の1週間
+                    </Button>
+                    <Button
+                        variant="light"
+                        color="pink"
+                        size="sm"
+                        rightSection={<IconChevronRight size={16} />}
+                        onClick={() =>
+                            setWeekStartDate(dayjs(weekStartDate).add(7, "day").toDate())
+                        }
+                    >
+                    次の1週間
+                    </Button>
+                </Group>
             </div>
-
-            <table
-                style={{
-                    borderCollapse: "collapse",
-                    width: "100%",
-                    tableLayout: "fixed",
-                }}
-            >
-            <thead>
-                <tr>
-                <th
+                <table
                     style={{
-                    width: "16%",
-                    background: "#f5f5f5",
-                    border: "1px solid #ccc",
+                        borderCollapse: "collapse",
+                        width: "100%",
+                        tableLayout: "fixed",
                     }}
                 >
-                    日時
-                </th>
-                {weekDays.map((d, i) => (
-                    <th
-                    key={i}
-                    style={{
-                        textAlign: "center",
-                        padding: 2,
-                        fontWeight: "bold",
-                        fontSize: "12px",
-                        background: d.isSunday
-                        ? "#fdecea"
-                        : d.isSaturday
-                        ? "#e3f2fd"
-                        : "#f5f5f5",
-                        border: "1px solid #ccc",
-                    }}
-                    >
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            lineHeight: "1.7",
-                        }}
-                    >
-                        <span
+                    <thead>
+                        <tr>
+                        <th
                             style={{
-                                fontSize: "14px",
-                                color: d.isSunday
-                                ? "#d32f2f"
-                                : d.isSaturday
-                                ? "#1976d2"
-                                : "#333",
+                            width: "16%",
+                            background: "#f5f5f5",
+                            border: "1px solid #ccc",
                             }}
                         >
-                        {dayjs(d.date).format("DD")}
-                        </span>
-                        <span
-                        style={{
-                            fontSize: "11px",
-                            color: d.isSunday
-                            ? "#d32f2f"
-                            : d.isSaturday
-                            ? "#1976d2"
-                            : "#555",
-                        }}
-                        >
-                        {d.dayName}
-                        </span>
-                    </div>
-                    </th>
-                ))}
-                </tr>
-            </thead>
-            <tbody>
-                {times.map((time, row) => (
-                <tr key={row}>
-                    <td
-                    style={{
-                        width: "16%",
-                        textAlign: "center",
-                        padding: "2px",
-                        fontSize: "15px",
-                        backgroundColor: "#f0f0f0",
-                        border: "1px solid #ccc",
-                    }}
-                    >
-                    {time}
-                    </td>
-                    {weekDays.map((d, col) => {
-                    const status = getStatus(d.date, time);
-                    const selected = isSlotSelected(d.date, time);
+                            日時
+                        </th>
+                        {weekDays.map((d, i) => (
+                            <th
+                            key={i}
+                            style={{
+                                textAlign: "center",
+                                padding: 2,
+                                fontWeight: "bold",
+                                fontSize: "12px",
+                                background: d.isSunday
+                                ? "#fdecea"
+                                : d.isSaturday
+                                ? "#e3f2fd"
+                                : "#f5f5f5",
+                                border: "1px solid #ccc",
+                            }}
+                            >
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    lineHeight: "1.9",
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        fontSize: "14px",
+                                        color: d.isSunday
+                                        ? "#d32f2f"
+                                        : d.isSaturday
+                                        ? "#1976d2"
+                                        : "#333",
+                                    }}
+                                >
+                                {dayjs(d.date).format("DD")}
+                                </span>
+                                <span
+                                style={{
+                                    fontSize: "11px",
+                                    color: d.isSunday
+                                    ? "#d32f2f"
+                                    : d.isSaturday
+                                    ? "#1976d2"
+                                    : "#555",
+                                }}
+                                >
+                                {d.dayName}
+                                </span>
+                            </div>
+                            </th>
+                        ))}
+                        </tr>
+                    </thead>
+                        <tbody>
+                            {times.map((time, row) => (
+                            <tr key={row}>
+                                <td
+                                style={{
+                                    width: "16%",
+                                    textAlign: "center",
+                                    padding: "2px",
+                                    fontSize: "15px",
+                                    backgroundColor: "#f0f0f0",
+                                    border: "1px solid #ccc",
+                                }}
+                                >
+                                {time}
+                                </td>
+                                {weekDays.map((d, col) => {
+                                const status = getStatus(d.date, time);
+                                const selected = isSlotSelected(d.date, time);
 
-                    let bg = "#e7e6e6ff";
-                    let symbol: React.ReactNode = <span style={{ color: "gray", fontSize: "21px" }}>○</span>;
+                                let bg = "#e7e6e6ff";
+                                let symbol: React.ReactNode = <span style={{ color: "gray", fontSize: "21px" }}>○</span>;
 
-                    if (selected) {
-                        bg = "#ec4881ff";
-                        symbol = <span style={{ color: "white", fontSize: "21px" }}>○</span>;
-                    } else if (status === "unavailable") {
-                        bg = "#cdccccff";
-                        symbol = <span style={{ color: "black", fontSize: "21px" }}>✕</span>;
-                    }
+                                if (selected) {
+                                    bg = "#ec4881ff";
+                                    symbol = <span style={{ color: "white", fontSize: "21px" }}>○</span>;
+                                } else if (status === "unavailable") {
+                                    bg = "#cdccccff";
+                                    symbol = <span style={{ color: "black", fontSize: "21px" }}>✕</span>;
+                                }
 
-                    return (
-                        <td
-                        key={col}
-                        onClick={() => handleSelect(d.date, time)}
-                        style={{
-                            cursor:
-                            status === "available" ? "pointer" : "not-allowed",
-                            height: 50,
-                            textAlign: "center",
-                            verticalAlign: "middle",
-                            backgroundColor: bg,
-                            color: "#dbd8d8ff",
-                            border: "1px solid #ccc",
-                            fontSize: "14px",
-                            userSelect: "none",
-                        }}
-                        >
-                        {symbol}
-                        </td>
-                    );
-                    })}
-                </tr>
-                ))}
-            </tbody>
+                                return (
+                                    <td
+                                        key={col}
+                                        onClick={() => handleSelect(d.date, time)}
+                                        style={{
+                                            cursor:
+                                            status === "available" ? "pointer" : "not-allowed",
+                                            height:60,
+                                            textAlign: "center",
+                                            verticalAlign: "middle",
+                                            backgroundColor: bg,
+                                            color: "#dbd8d8ff",
+                                            border: "1px solid #ccc",
+                                            fontSize: "14px",
+                                            userSelect: "none",
+                                        }}
+                                    >
+                                    {symbol}
+                                    </td>
+                                );
+                                })}
+                            </tr>
+                            ))}
+                        </tbody>
             </table>
 
             {selectedDate && selectedTime && (
@@ -278,7 +277,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                 </Paper>
             )}
 
-            {/* 予約内容確認 → 次へ */}
             {selectedDate && selectedTime && selectedServices.length > 0 && (
                 <Button
                     onClick={handleNext}
