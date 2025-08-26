@@ -5,6 +5,7 @@ __pycache__/
 *.sqlite3
 
 .venv
+api/venv
 .env
 
 .vscode/
