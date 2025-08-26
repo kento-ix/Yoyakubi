@@ -241,7 +241,6 @@ const CustomerFormPage: React.FC = () => {
                 />
               </Group>
 
-              {/* Phone field */}
               <TextInput
                 label="電話番号"
                 placeholder="090-1234-5678"
@@ -249,7 +248,6 @@ const CustomerFormPage: React.FC = () => {
                 {...form.getInputProps('phone')}
               />
 
-              {/* Email field */}
               <TextInput
                 label="メールアドレス"
                 placeholder="example@email.com"
@@ -258,7 +256,6 @@ const CustomerFormPage: React.FC = () => {
                 {...form.getInputProps('email')}
               />
 
-              {/* Birthday field - responsive */}
               {isMobile ? (
                 <Stack gap="xs">
                   <Text size="sm" fw={500}>
@@ -298,7 +295,6 @@ const CustomerFormPage: React.FC = () => {
                 />
               )}
 
-              {/* Submit button */}
               <Button
                 type="submit"
                 color="pink"
