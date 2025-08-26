@@ -289,15 +289,25 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
       )}
 
       {selectedDate && selectedTime && selectedServices.length > 0 && (
-        <Button
-          onClick={handleNext}
-          color="pink"
-          size="lg"
-          mt="md"
-          fullWidth
-        >
-          次へ進む
-        </Button>
+        <>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}>
+                <Button 
+                    onClick={() => navigate("/menu")}
+                    variant="outline" 
+                    color="gray"
+                    size="md"
+                >
+                    戻る
+                </Button>
+                <Button
+                    onClick={handleNext}
+                    color="pink"
+                    size="md"
+                >
+                    次へ進む
+                </Button>
+            </div>
+        </>
       )}
     </div>
   );
