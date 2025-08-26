@@ -52,8 +52,8 @@ const MenuSelection: React.FC = () => {
 
     const getCategoryColor = (category: string) => {
         switch (category) {
-        case 'ハンド': return 'blue';
-        case 'フット': return 'pink';
+        case 'ハンド': return 'pink';
+        case 'フット': return 'blue';
         case 'オプション': return 'green';
         default: return 'gray';
         }
