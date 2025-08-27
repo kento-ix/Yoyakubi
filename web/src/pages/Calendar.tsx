@@ -12,6 +12,8 @@ import { Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { selectedServiceAtom } from "../atoms/serviceAtom";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 dayjs.locale("ja");
 
@@ -21,17 +23,32 @@ interface CalendarProps {
   unavailable?: (date: string, time: string) => boolean;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
+const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
   const [weekStartDate, setWeekStartDate] = useAtom(weekStartDateAtom);
   const [weekDays] = useAtom(weekDaysAtom);
   const [selectedDate, setSelectedDate] = useAtom(selectedDateAtom);
   const [selectedTime, setSelectedTime] = useAtom(selectedTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
   const navigate = useNavigate();
+  const [reservedSlots, setReservedSlots] = useState<{date: string, time: string}[]>([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/calendar/reserved_slots")
+      .then(response => {
+        console.log("Raw response:", response);
+        console.log("Response data:", response.data);
+
+        const data = response.data;
+        if(data.success) setReservedSlots(data.reserved_slots);
+      })
+      .catch(error => {
+        console.error("Fail to get time slot:", error);
+      });
+  }, []);
+
 
   const totalDuration = selectedServices.reduce(
-    (acc, service) => acc + service.duration,
-    0
+    (acc, service) => acc + service.duration, 0
   );
 
   const calculateEndTime = (startTime: string, duration: number): string => {
@@ -63,17 +80,30 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
   );
 
   const handleSelect = (date: Date, time: string) => {
-    if (unavailable?.(dayjs(date).format("YYYY-MM-DD"), time)) return;
-    setSelectedDate(dayjs(date).format("YYYY-MM-DD"));
+    const dateStr = dayjs(date).format("YYYY-MM-DD");
+    if (reservedSlots.some(slot => slot.date === dateStr && slot.time === time)) return;
+    if (unavailable(dateStr, time)) return;
+    setSelectedDate(dateStr);
     setSelectedTime(time);
   };
 
+  
   const getStatus = (date: Date, time: string): SlotStatus => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
-    if (unavailable?.(dateStr, time)) return "unavailable";
-    if (selectedDate === dateStr && selectedTime === time) return "selected";
+
+    const reservedTimes = reservedSlots
+      .filter(slot => slot.date === dateStr)
+      .map(slot => slot.time);
+
+    const startIndex = times.indexOf(time);
+    const slotCount = Math.ceil(totalDuration / 30);
+    const range = times.slice(startIndex, startIndex + slotCount);
+    if (range.some(t => reservedTimes.includes(t) || unavailable(dateStr, t))) return "unavailable";
+    if (selectedDate === dateStr && isSlotSelected(date, time)) return "selected";
+
     return "available";
   };
+
 
   const handleNext = () => {
     if (selectedDate && selectedTime && selectedServices.length > 0) {
@@ -96,17 +126,9 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
 
   return (
     <div style={{ width: "100%", overflowX: "hidden" }}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
-          marginBottom: 8,
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: 8 }}>
         <div style={{ textAlign: "center", fontWeight: 500 }}>
-          {dayjs(weekDays[0].date).format("YYYY/MM/DD")} -{" "}
-          {dayjs(weekDays[6].date).format("MM/DD")}
+          {dayjs(weekDays[0].date).format("YYYY/MM/DD")} - {dayjs(weekDays[6].date).format("MM/DD")}
         </div>
 
         <Group justify="center" gap="xs">
@@ -114,9 +136,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
             variant="light"
             color="pink"
             size="sm"
-            onClick={() =>
-              setWeekStartDate(dayjs(weekStartDate).subtract(7, "day").toDate())
-            }
+            onClick={() => setWeekStartDate(dayjs(weekStartDate).subtract(7, "day").toDate())}
           >
             前の1週間
           </Button>
@@ -125,33 +145,18 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
             color="pink"
             size="sm"
             rightSection={<IconChevronRight size={16} />}
-            onClick={() =>
-              setWeekStartDate(dayjs(weekStartDate).add(7, "day").toDate())
-            }
+            onClick={() => setWeekStartDate(dayjs(weekStartDate).add(7, "day").toDate())}
           >
             次の1週間
           </Button>
         </Group>
       </div>
 
-      <table
-        style={{
-          borderCollapse: "collapse",
-          width: "100%",
-          tableLayout: "fixed",
-        }}
-      >
+      {/* 時間割テーブル */}
+      <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
         <thead>
           <tr>
-            <th
-              style={{
-                width: "16%",
-                background: "#f5f5f5",
-                border: "1px solid #ccc",
-              }}
-            >
-              日時
-            </th>
+            <th style={{ width: "16%", background: "#f5f5f5", border: "1px solid #ccc" }}>日時</th>
             {weekDays.map((d, i) => (
               <th
                 key={i}
@@ -160,43 +165,15 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                   padding: 2,
                   fontWeight: "bold",
                   fontSize: "12px",
-                  background: d.isSunday
-                    ? "#fdecea"
-                    : d.isSaturday
-                    ? "#e3f2fd"
-                    : "#f5f5f5",
+                  background: d.isSunday ? "#fdecea" : d.isSaturday ? "#e3f2fd" : "#f5f5f5",
                   border: "1px solid #ccc",
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    lineHeight: "2.1",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      color: d.isSunday
-                        ? "#d32f2f"
-                        : d.isSaturday
-                        ? "#1976d2"
-                        : "#333",
-                    }}
-                  >
+                <div style={{ display: "flex", flexDirection: "column", lineHeight: "2.1" }}>
+                  <span style={{ fontSize: "14px", color: d.isSunday ? "#d32f2f" : d.isSaturday ? "#1976d2" : "#333" }}>
                     {dayjs(d.date).format("DD")}
                   </span>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: d.isSunday
-                        ? "#d32f2f"
-                        : d.isSaturday
-                        ? "#1976d2"
-                        : "#555",
-                    }}
-                  >
+                  <span style={{ fontSize: "11px", color: d.isSunday ? "#d32f2f" : d.isSaturday ? "#1976d2" : "#555" }}>
                     {d.dayName}
                   </span>
                 </div>
@@ -208,16 +185,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
         <tbody>
           {times.map((time, row) => (
             <tr key={row}>
-              <td
-                style={{
-                  width: "16%",
-                  textAlign: "center",
-                  padding: "2px",
-                  fontSize: "15px",
-                  backgroundColor: "#f0f0f0",
-                  border: "1px solid #ccc",
-                }}
-              >
+              <td style={{ width: "16%", textAlign: "center", padding: "2px", fontSize: "15px", backgroundColor: "#f0f0f0", border: "1px solid #ccc" }}>
                 {time}
               </td>
               {weekDays.map((d, col) => {
@@ -225,20 +193,14 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
                 const selected = isSlotSelected(d.date, time);
 
                 let bg = "#ffffffff";
-                let symbol: React.ReactNode = (
-                  <span style={{ color: "gray", fontSize: "21px" }}>○</span>
-                );
+                let symbol: React.ReactNode = <span style={{ color: "gray", fontSize: "21px" }}>○</span>;
 
                 if (selected) {
                   bg = "#ec4881ff";
-                  symbol = (
-                    <span style={{ color: "white", fontSize: "21px" }}>○</span>
-                  );
+                  symbol = <span style={{ color: "white", fontSize: "21px" }}>○</span>;
                 } else if (status === "unavailable") {
                   bg = "#cdccccff";
-                  symbol = (
-                    <span style={{ color: "black", fontSize: "21px" }}>✕</span>
-                  );
+                  symbol = <span style={{ color: "black", fontSize: "21px" }}>✕</span>;
                 }
 
                 return (
@@ -267,20 +229,10 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
       </table>
 
       {selectedDate && selectedTime && (
-        <Paper
-          p="md"
-          mt="md"
-          shadow="sm"
-          radius="md"
-          style={{ backgroundColor: "#fdecef" }}
-        >
+        <Paper p="md" mt="md" shadow="sm" radius="md" style={{ backgroundColor: "#fdecef" }}>
           <Stack gap="xs">
-            <Text fw={600} c="pink.8">
-              選択中の予約時間
-            </Text>
-            <Text>
-              日付: {dayjs(selectedDate).format("YYYY年MM月DD日(ddd)")}
-            </Text>
+            <Text fw={600} c="pink.8">選択中の予約時間</Text>
+            <Text>日付: {dayjs(selectedDate).format("YYYY年MM月DD日(ddd)")}</Text>
             <Text>開始時間: {selectedTime}</Text>
             <Text>終了時間: {calculateEndTime(selectedTime, totalDuration)}</Text>
             <Text>所要時間: {totalDuration}分</Text>
@@ -289,25 +241,14 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable }) => {
       )}
 
       {selectedDate && selectedTime && selectedServices.length > 0 && (
-        <>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}>
-                <Button 
-                    onClick={() => navigate("/menu")}
-                    variant="outline" 
-                    color="gray"
-                    size="md"
-                >
-                    戻る
-                </Button>
-                <Button
-                    onClick={handleNext}
-                    color="pink"
-                    size="md"
-                >
-                    次へ進む
-                </Button>
-            </div>
-        </>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}>
+          <Button onClick={() => navigate("/menu")} variant="outline" color="gray" size="md">
+            戻る
+          </Button>
+          <Button onClick={handleNext} color="pink" size="md">
+            次へ進む
+          </Button>
+        </div>
       )}
     </div>
   );
