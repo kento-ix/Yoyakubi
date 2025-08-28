@@ -12,8 +12,9 @@ import { Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { selectedServiceAtom } from "../atoms/serviceAtom";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useEffect, useState } from "react";
+import { fetchReservedSlots } from "../api/calendarApi";
+import type { ReservedSlot } from "../types/date";
 
 dayjs.locale("ja");
 
@@ -30,36 +31,47 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
   const [selectedTime, setSelectedTime] = useAtom(selectedTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
   const navigate = useNavigate();
-  const [reservedSlots, setReservedSlots] = useState<{date: string, time: string}[]>([]);
+  const [reservedSlots, setReservedSlots] = useState<ReservedSlot[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/calendar/reserved_slots")
-      .then(response => {
-        console.log("Raw response:", response);
-        console.log("Response data:", response.data);
-
-        const data = response.data;
-        if(data.success) setReservedSlots(data.reserved_slots);
+    fetchReservedSlots()
+      .then(data => {
+        console.log("Response data:", data);
+        if (data.success) setReservedSlots(data.reserved_slots);
       })
-      .catch(error => {
-        console.error("Fail to get time slot:", error);
+      .catch(err => {
+        console.error("Error in Calendar:", err);
       });
   }, []);
 
 
-  const totalDuration = selectedServices.reduce(
-    (acc, service) => acc + service.duration, 0
-  );
+  // get duration
+  const totalDuration = selectedServices.reduce((acc, service) => acc + service.duration, 0);
 
+  // get End time adding duration to start time
   const calculateEndTime = (startTime: string, duration: number): string => {
     const [hours, minutes] = startTime.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes + duration;
     const endHours = Math.floor(totalMinutes / 60);
     const endMins = totalMinutes % 60;
-    return `${endHours.toString().padStart(2, "0")}:${endMins
-      .toString()
-      .padStart(2, "0")}`;
+
+    return `${endHours.toString().padStart(2, "0")}:${endMins.toString().padStart(2, "0")}`;
   };
+
+  // useEffect (() => {
+  //   const result = calculateEndTime("13:00", 60);
+  //   console.log("Calculated End Time:", result);
+  // }, []);
+
+  // const getEndTime = (id: string, reservedSlots: ReservedSlot[]): string | null => {
+  //   for (const slot of reservedSlots) {
+  //     const booking = slot.bookings.find(b => b.id === id);
+  //     if(booking && booking.times.length > 0) {
+  //       return booking.times[booking.times.length - 1];
+  //     }
+  //   }
+  //   return null;
+  // }
 
   const isSlotSelected = (date: Date, time: string) => {
     if (!selectedDate || !selectedTime) return false;
@@ -81,8 +93,14 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
 
   const handleSelect = (date: Date, time: string) => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
-    if (reservedSlots.some(slot => slot.date === dateStr && slot.time === time)) return;
+
+    const reservedForDate = reservedSlots.find(slot => slot.date === dateStr);
+    if (reservedForDate && reservedForDate.times.includes(time)) {
+      return;
+    }
+
     if (unavailable(dateStr, time)) return;
+    
     setSelectedDate(dateStr);
     setSelectedTime(time);
   };
@@ -91,18 +109,26 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
   const getStatus = (date: Date, time: string): SlotStatus => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
 
+    // flatten reserved times for the date
     const reservedTimes = reservedSlots
       .filter(slot => slot.date === dateStr)
-      .map(slot => slot.time);
+      .flatMap(slot => slot.times);
 
     const startIndex = times.indexOf(time);
     const slotCount = Math.ceil(totalDuration / 30);
     const range = times.slice(startIndex, startIndex + slotCount);
-    if (range.some(t => reservedTimes.includes(t) || unavailable(dateStr, t))) return "unavailable";
-    if (selectedDate === dateStr && isSlotSelected(date, time)) return "selected";
+
+    if (range.some(t => reservedTimes.includes(t) || unavailable(dateStr, t))) {
+      return "unavailable";
+    }
+
+    if (selectedDate === dateStr && isSlotSelected(date, time)) {
+      return "selected";
+    }
 
     return "available";
   };
+
 
 
   const handleNext = () => {

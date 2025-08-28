@@ -20,7 +20,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
 import type { CustomerForm } from '../types/customer';
-import { checkExistingUser, createCustomer } from '../services/customerService';
+import { checkExistingUser, createCustomer } from '../api/customerService';
 import { checkingUserAtom, customerErrorAtom } from '../atoms/customerAtom';
 
 const CustomerFormPage: React.FC = () => {

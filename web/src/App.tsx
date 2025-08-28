@@ -17,7 +17,7 @@ function App() {
           path="/"
           element={
             <StepperComponent>
-              <MenuSelection/>
+              <CustomerForm/>
             </StepperComponent>
           }
         />

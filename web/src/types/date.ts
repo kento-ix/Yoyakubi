@@ -7,7 +7,14 @@ export interface WeekDay {
   isPast: boolean;
 }
 
-export interface TimeSlot {
-  time: string;
-  available: boolean;
+interface Booking {
+  id: string;
+  title: string;
+  times: string[];
+}
+
+export interface ReservedSlot {
+  times: any;
+  date: string;
+  bookings: Booking[];
 }
