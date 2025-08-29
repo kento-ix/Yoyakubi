@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
+import { postReserve } from "../api/calendarApi";
 
 interface ReservationData {
   date: string;
@@ -33,8 +34,18 @@ const ReservationConfirm: React.FC = () => {
     }
   }, []);
 
-  const handleConfirm = () => {
-    navigate("/complete");
+  const handleConfirm = async () => {
+    if (!reservationData) return;
+
+    try {
+      const result = await postReserve(reservationData);
+      console.log("予約成功:", result);
+
+      navigate("/complete");
+    } catch (error) {
+      console.error("予約失敗:", error);
+      alert("予約に失敗しました。もう一度お試しください。");
+    }
   };
 
   if (!reservationData) {

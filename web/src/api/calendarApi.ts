@@ -9,3 +9,17 @@ export const fetchReservedSlots = async () => {
     throw error;
   }
 };
+
+export async function postReserve(reservationData: any) {
+  try {
+    const response = await axios.post("http://localhost:8000/calendar/reserve", reservationData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("予約送信エラー:", error);
+    throw error.response?.data || error;
+  }
+}
