@@ -37,7 +37,7 @@ def get_reserved_slots():
 
             slot_times = []
             slot_time = start_dt
-            while slot_time < end_dt:
+            while slot_time <= end_dt:
                 slot_times.append(slot_time.strftime("%H:%M"))
                 slot_time += timedelta(minutes=30)
 

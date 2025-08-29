@@ -14,7 +14,7 @@ interface Booking {
 }
 
 export interface ReservedSlot {
-  times: any;
+  times: string[];
   date: string;
   bookings: Booking[];
 }

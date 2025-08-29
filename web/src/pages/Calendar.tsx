@@ -18,7 +18,7 @@ import type { ReservedSlot } from "../types/date";
 
 dayjs.locale("ja");
 
-type SlotStatus = "available" | "unavailable" | "selected";
+type SlotStatus = "available" | "reserved" | "preReserved" | "selected";
 
 interface CalendarProps {
   unavailable?: (date: string, time: string) => boolean;
@@ -75,6 +75,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
 
   const isSlotSelected = (date: Date, time: string) => {
     if (!selectedDate || !selectedTime) return false;
+    
     const dateStr = dayjs(date).format("YYYY-MM-DD");
     if (selectedDate !== dateStr) return false;
 
@@ -87,20 +88,17 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
     return slotTotal >= startTotal && slotTotal < startTotal + totalDuration;
   };
 
-  const times = Array.from({ length: 18 }, (_, i) =>
-    dayjs().hour(9).minute(0).add(i * 30, "minute").format("HH:mm")
-  );
+  const times = Array.from({ length: 18 }, (_, i) => dayjs().hour(9).minute(0).add(i * 30, "minute").format("HH:mm"));
 
   const handleSelect = (date: Date, time: string) => {
-    const dateStr = dayjs(date).format("YYYY-MM-DD");
-
-    const reservedForDate = reservedSlots.find(slot => slot.date === dateStr);
-    if (reservedForDate && reservedForDate.times.includes(time)) {
+    const status = getStatus(date, time);
+    
+    // Prevent selection of reserved and preReserved slots
+    if (status === "reserved" || status === "preReserved") {
       return;
     }
-
-    if (unavailable(dateStr, time)) return;
     
+    const dateStr = dayjs(date).format("YYYY-MM-DD");
     setSelectedDate(dateStr);
     setSelectedTime(time);
   };
@@ -109,17 +107,29 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
   const getStatus = (date: Date, time: string): SlotStatus => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
 
-    // flatten reserved times for the date
+    // Get all reserved times for the date from both slot.times and booking.times
     const reservedTimes = reservedSlots
       .filter(slot => slot.date === dateStr)
-      .flatMap(slot => slot.times);
+      .flatMap(slot => {
+        // Combine slot.times and all booking.times
+        const slotTimes = slot.times || [];
+        const bookingTimes = slot.bookings?.flatMap(booking => booking.times || []) || [];
+        return [...slotTimes, ...bookingTimes];
+      });
 
+    // Check if this specific time slot is directly reserved
+    if (reservedTimes.includes(time) || unavailable(dateStr, time)) {
+      return "reserved";
+    }
+
+    // Check if selecting this slot would conflict with existing reservations
     const startIndex = times.indexOf(time);
     const slotCount = Math.ceil(totalDuration / 30);
     const range = times.slice(startIndex, startIndex + slotCount);
 
-    if (range.some(t => reservedTimes.includes(t) || unavailable(dateStr, t))) {
-      return "unavailable";
+    // If any slot in the duration range (excluding the current slot) is reserved, this is preReserved
+    if (range.some(t => t !== time && (reservedTimes.includes(t) || unavailable(dateStr, t)))) {
+      return "preReserved";
     }
 
     if (selectedDate === dateStr && isSlotSelected(date, time)) {
@@ -152,6 +162,23 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
 
   return (
     <div style={{ width: "100%", overflowX: "hidden" }}>
+
+      <Stack justify="center" style={{ marginBottom: 15 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "#ec4881ff", color: "white", borderRadius: "50px", padding: "6px"}}>
+          <span style={{ color: "white", fontSize: 18 }}>○</span>
+          <span style={{ fontSize: 15 }}>選択可能</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "#64cf39ff", color: "white", borderRadius: "50px", padding: "6px"}}>
+          <span style={{ color: "white", fontSize: 18 }}>△</span>
+          <span style={{ fontSize: 15 }}>予約に被る可能性(予約可能)</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "#4375d9ff", color: "white", borderRadius: "50px", padding: "6px"}}>
+          <span style={{ color: "white", fontSize: 18 }}>✕</span>
+          <span style={{ fontSize: 15 }}>予約不可能</span>
+        </div>
+      </Stack>
+
+
       <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: 8 }}>
         <div style={{ textAlign: "center", fontWeight: 500 }}>
           {dayjs(weekDays[0].date).format("YYYY/MM/DD")} - {dayjs(weekDays[6].date).format("MM/DD")}
@@ -224,9 +251,12 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
                 if (selected) {
                   bg = "#ec4881ff";
                   symbol = <span style={{ color: "white", fontSize: "21px" }}>○</span>;
-                } else if (status === "unavailable") {
+                } else if (status === "reserved") {
                   bg = "#cdccccff";
                   symbol = <span style={{ color: "black", fontSize: "21px" }}>✕</span>;
+                } else if (status === "preReserved") {
+                  bg = "#cdccccff";
+                  symbol = <span style={{ color: "black", fontSize: "21px" }}>△</span>;
                 }
 
                 return (
