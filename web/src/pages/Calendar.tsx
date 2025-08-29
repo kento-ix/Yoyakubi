@@ -180,11 +180,11 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
 
 
       <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: 8 }}>
-        <div style={{ textAlign: "center", fontWeight: 500 }}>
+        <div style={{ textAlign: "center", fontWeight: 500, margin: "15px", padding: "15px", backgroundColor: "#e6e6e6ff", borderRadius: "30px" }}>
           {dayjs(weekDays[0].date).format("YYYY/MM/DD")} - {dayjs(weekDays[6].date).format("MM/DD")}
         </div>
 
-        <Group justify="center" gap="xs">
+        <Group justify="center" gap="xs" m="md">
           <Button
             variant="light"
             color="pink"
