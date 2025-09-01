@@ -6,7 +6,15 @@ import pytz
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
-@router.get("/reserved_slots")
+@router.post("/add_reserve")
+def add_reserved():
+    """
+        Add reserve to calendar
+    """
+
+    
+
+@router.get("/get_reserved")
 def get_reserved_slots():
     """
     Return a week events, grouped by date and including title

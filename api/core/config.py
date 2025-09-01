@@ -13,6 +13,16 @@ class Settings(BaseSettings):
     business_calendar_id: str = Field(..., env="BUSINESS_CALENDAR_ID")
     # database_url: str = Field(..., env="DATABASE_URL")
 
+    db_username: str = Field(..., env="DB_USERNAME")
+    db_password: str = Field(..., env="DB_PASSWORD")
+    db_host: str = Field(..., env="DB_HOST")
+    db_port: str = Field(default="5432", env="DB_PORT")
+    db_name: str = Field(..., env="DB_NAME")
+
+    @property
+    def database_url(self) -> str:
+        return f"postgresql+psycopg2://{self.db_username}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+
     class Config:
         env_file = ".env"
         extra = "ignore"

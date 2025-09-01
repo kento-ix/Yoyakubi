@@ -2,11 +2,17 @@ from fastapi import FastAPI
 # from services.response_client import router as client_router
 # from services.response_business import router as business_router
 from fastapi.middleware.cors import CORSMiddleware
-
 from v1.services.calendar import router as calendar_router
+
+from db.database import engine
+from model.orm_reservation import Base
 
 
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:3000",
@@ -27,9 +33,8 @@ app.include_router(calendar_router)
 
 @app.get("/")
 def root():
-    return {"Test Message": "FastAPI is running!"}
+    return {"message": "Welcome to Yoyakubi API"}
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-    
