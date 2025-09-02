@@ -11,7 +11,7 @@ interface ReservationData {
   endTime: string;
   services: {
     id: number;
-    name: string;
+    service_name: string;
     description: string;
     duration: number;
     price: number;
@@ -74,7 +74,7 @@ const ReservationConfirm: React.FC = () => {
             {reservationData.services.map((service) => (
               <Group key={service.id} justify="space-between">
                 <div>
-                  <Text fw={500}>{service.name}</Text>
+                  <Text fw={500}>{service.service_name}</Text>
                   <Text size="sm" c="dimmed">
                     {service.duration}分
                   </Text>

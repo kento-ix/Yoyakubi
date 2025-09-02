@@ -16,12 +16,12 @@ function App() {
         <Route
           path="/"
           element={
-            <StepperComponent>
-              <MenuSelection/>
-            </StepperComponent>
+            // <StepperComponent>
+              <CustomerForm/>
+            // </StepperComponent>
           }
         />
-        <Route path="/customer-form" element={<CustomerForm />} />
+        {/* <Route path="/customer-form" element={<CustomerForm />} /> */}
         <Route
           path="/menu"
           element={
