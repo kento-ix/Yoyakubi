@@ -1,83 +1,79 @@
-# from fastapi import APIRouter, Request, HTTPException
-# from linebot import LineBotApi, WebhookHandler
-# from linebot.exceptions import InvalidSignatureError
-# from linebot.models import MessageEvent, TextMessage, TextSendMessage
+# response_client.py
+from fastapi import APIRouter, Request, HTTPException, Depends
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+    TemplateSendMessage, ButtonsTemplate, URITemplateAction
+)
 
-# from core.config import settings
+from sqlalchemy.orm import Session
+from core.config import settings
+from db.database import get_db
+from model.orm_reservation import User
 
-# router = APIRouter()
+router = APIRouter()
 
-# client_line_api = LineBotApi(settings.line_client_access_token)
-# handler = WebhookHandler(settings.line_client_secret)
+# test url
+REGISTER_URL = "https://yoyakubi.vercel.app/"
+MENU_URL = "https://yoyakubi.vercel.app/menu"
 
-# user_states = {}
+client_line_api = LineBotApi(settings.line_client_access_token)
+handler = WebhookHandler(settings.line_client_secret)
 
-# @router.post("/callback")
-# async def callback(request: Request):
-#     signature = request.headers.get("X-Line-Signature")
-#     body = await request.body()
-#     body_text = body.decode("utf-8")
+@router.post("/callback")
+async def callback(request: Request, db: Session = Depends(get_db)):
+    signature = request.headers.get("X-Line-Signature")
+    body = await request.body()
+    body_text = body.decode("utf-8")
 
-#     try:
-#         handler.handle(body_text, signature)
-#     except InvalidSignatureError:
-#         raise HTTPException(status_code=400, detail="Invalid signature")
+    print("Webhook受信:", body_text) 
 
-#     return "OK"
+    try:
 
-# @handler.add(MessageEvent, message=TextMessage)
-# def handle_message(event):
-#     user_id = event.source.user_id
-#     incoming_text = event.message.text.strip()
+        request.state.db = db
+        handler.handle(body_text, signature)
+    except InvalidSignatureError:
+        raise HTTPException(status_code=400, detail="Invalid signature")
 
-#     state = user_states.get(user_id, "START")
+    return "OK"
 
-#     if state == "START":
-#         if incoming_text == "1":
-#             reply_text = "ご予約ありがとうございます！\n・午前(9時〜12時)\n・午後(13時〜17時)\nどちらがご希望ですか?\n「午前」か「午後」でお答えください。"
-#             user_states[user_id] = "WAIT_TIME_PREFERENCE"
-#         elif incoming_text == "2":
-#             reply_text = "Googleカレンダー連携の予約は現在開発中です。しばらくお待ちください!"
-#         else:
-#             reply_text = "こんにちは！ご予約方法をお選びください😊\n1: LINEでそのまま予約\n2: Googleカレンダーと連携して予約\n数字でお答えください。"
 
-#     elif state == "WAIT_TIME_PREFERENCE":
-#         if incoming_text in ["午前", "午後"]:
-#             user_states[user_id] = "WAIT_DATE_SELECTION"
-#             # 仮の予約候補日を提示（DBで設計する）
-#             if incoming_text == "午前":
-#                 candidates = ["4/10 10:00", "4/11 11:00", "4/12 09:30"]
-#             else:
-#                 candidates = ["4/10 14:00", "4/11 15:30", "4/12 13:00"]
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    incoming_text = event.message.text.strip()
+    user_line_id = event.source.user_id
+    print("ユーザー発言:", incoming_text, "LINE ID:", user_line_id)
 
-#             reply_text = "ご希望の時間帯に基づく予約候補日です。\n以下の中から予約したい日時の番号を送信してください。\n"
-#             for i, c in enumerate(candidates, 1):
-#                 reply_text += f"{i}: {c}\n"
+    if incoming_text == "予約する":
+        db: Session = getattr(event.source, "db", None)
+        if db is None:
+            from db.database import SessionLocal
+            db = SessionLocal()
+            
+        user = db.query(User).filter(User.line_id == user_line_id).first()
 
-#             # 候補日を一時保存（DBで設計する)
-#             user_states[user_id+"_candidates"] = candidates
-#         else:
-#             reply_text = "すみません、「午前」か「午後」でお答えください。"
+        if user is None:
+            buttons = ButtonsTemplate(
+                title="未登録ユーザー",
+                text="まずは登録をお願いします",
+                actions=[
+                    URITemplateAction(label="登録する", uri=REGISTER_URL)
+                ]
+            )
+            reply = TemplateSendMessage(alt_text="登録ページへ", template=buttons)
+        else:
+            # 登録済み → メニューページに誘導
+            buttons = ButtonsTemplate(
+                title="予約メニュー",
+                text="予約するメニューを選択してください",
+                actions=[
+                    URITemplateAction(label="メニューを見る", uri=MENU_URL)
+                ]
+            )
+            reply = TemplateSendMessage(alt_text="メニューへ", template=buttons)
 
-#     elif state == "WAIT_DATE_SELECTION":
-#         candidates = user_states.get(user_id+"_candidates", [])
-        
-#         if incoming_text in ["1", "2", "3"]:
-#             idx = int(incoming_text) - 1
-#             selected_date = candidates[idx]
-#             reply_text = f"ご予約を承りました！\n{selected_date}で予約を確定します。\nありがとうございます！"
-#             user_states[user_id] = "START"
-#             user_states.pop(user_id+"_candidates", None)
-#         else:
-#             reply_text = "1〜3の番号で予約候補日を選択してください。"
-
-#     else:
-#         reply_text = "エラーが発生しました。もう一度「1」か「2」でご予約方法を選択してください。"
-#         user_states[user_id] = "START"
-
-#     print(f"{user_id} says: {incoming_text} (state: {state})")
-
-#     line_bot_api.reply_message(
-#         event.reply_token,
-#         TextSendMessage(text=reply_text)
-#     )
+        client_line_api.reply_message(event.reply_token, reply)
+    else:
+        reply = TextSendMessage(text="「予約する」と送信してください")
+        client_line_api.reply_message(event.reply_token, reply)
