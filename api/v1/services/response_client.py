@@ -54,6 +54,9 @@ def handle_message(event):
         user = db.query(User).filter(User.line_id == user_line_id).first()
 
         if user is None:
+            text_message = TextSendMessage(
+                text="当日予約をご希望の際は直接店舗までご連絡ください。\n xxx-xxxx-xxxx"
+            )
             buttons = ButtonsTemplate(
                 title="未登録ユーザー",
                 text="まずは登録をお願いします",
@@ -61,7 +64,7 @@ def handle_message(event):
                     URITemplateAction(label="登録する", uri=REGISTER_URL)
                 ]
             )
-            reply = TemplateSendMessage(alt_text="登録ページへ", template=buttons)
+            template_message = TemplateSendMessage(alt_text="登録ページへ", template=buttons)
         else:
             # 登録済み → メニューページに誘導
             buttons = ButtonsTemplate(
@@ -71,9 +74,9 @@ def handle_message(event):
                     URITemplateAction(label="メニューを見る", uri=MENU_URL)
                 ]
             )
-            reply = TemplateSendMessage(alt_text="メニューへ", template=buttons)
+            template_message = TemplateSendMessage(alt_text="メニューへ", template=buttons)
 
-        client_line_api.reply_message(event.reply_token, reply)
+        client_line_api.reply_message(event.reply_token, [text_message, template_message])
     else:
         reply = TextSendMessage(text="「予約する」と送信してください")
         client_line_api.reply_message(event.reply_token, reply)
