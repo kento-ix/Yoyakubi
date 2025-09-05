@@ -3,6 +3,7 @@ from v1.services.response_client import router as client_router
 # from services.response_business import router as business_router
 from fastapi.middleware.cors import CORSMiddleware
 from v1.services.calendar import router as calendar_router
+from v1.services.customer_api import router as customer_router
 
 from db.database import engine
 from model.orm_reservation import Base
@@ -29,6 +30,7 @@ app.add_middleware(
 
 app.include_router(calendar_router)
 app.include_router(client_router)
+app.include_router(customer_router)
 #app.include_router(business_router)
 
 @app.get("/")
