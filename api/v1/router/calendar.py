@@ -6,11 +6,11 @@ import pytz
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
-@router.post("/add_reserve")
-def add_reserved():
-    """
-        Add reserve to calendar
-    """
+# @router.post("/add_reserve")
+# def add_reserved():
+#     """
+#         Add reserve to calendar
+#     """
 
     
 
