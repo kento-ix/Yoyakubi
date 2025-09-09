@@ -15,7 +15,7 @@ from model.orm_reservation import User
 router = APIRouter()
 
 # test url
-REGISTER_URL = "https://yoyakubi.vercel.app/"
+REGISTER_URL = "https://yoyakubi.vercel.app/customer-form"
 MENU_URL = "https://yoyakubi.vercel.app/menu"
 
 client_line_api = LineBotApi(settings.line_client_access_token)
@@ -54,6 +54,8 @@ def handle_message(event):
         user = db.query(User).filter(User.line_id == user_line_id).first()
 
         if user is None:
+            register_url_with_id = f"{REGISTER_URL}?line_id={user_line_id}"
+
             text_message = TextSendMessage(
                 text="当日予約をご希望の際は直接店舗までご連絡ください。\n xxx-xxxx-xxxx"
             )
@@ -61,12 +63,11 @@ def handle_message(event):
                 title="未登録ユーザー",
                 text="まずは登録をお願いします",
                 actions=[
-                    URITemplateAction(label="登録する", uri=REGISTER_URL)
+                    URITemplateAction(label="登録する", uri=register_url_with_id)
                 ]
             )
             template_message = TemplateSendMessage(alt_text="登録ページへ", template=buttons)
         else:
-            # 登録済み → メニューページに誘導
             buttons = ButtonsTemplate(
                 title="予約メニュー",
                 text="予約するメニューを選択してください",

@@ -12,12 +12,9 @@ def test_customer_api():
 
 @router.post("/user_form")
 def register_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
-    {"message": "This is post api for user form"}
-    print("Received customer data:", customer)
-    return {"received_data": customer}
-    # existing = get_user_by_line_id(db, customer.lineUserId)
-    # if existing:
-    #     raise HTTPException(status_code=400, detail="User already exists")
-    # new_user = create_customer(db, customer)
-    # return {"id": new_user.id, "message": "Customer created successfully"}
+    existing = get_user_by_line_id(db, customer.lineUserId)
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+    new_user = create_customer(db, customer)
+    return {"id": new_user.id, "message": "Customer created successfully"}
 
