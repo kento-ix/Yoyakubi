@@ -14,7 +14,7 @@ function App() {
     <Router>
       <Routes>
         <Route
-          path="/"
+          path="/customer-form"
           element={
             // <StepperComponent>
               <CustomerForm/>

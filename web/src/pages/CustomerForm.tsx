@@ -19,7 +19,7 @@ import { DateInput } from '@mantine/dates';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
-import type { CustomerForm } from '../types/customer';
+import type { CustomerForm, CustomerCreateRequest } from '../types/customer';
 import { checkExistingUser, createCustomer } from '../api/customerService';
 import { checkingUserAtom, customerErrorAtom } from '../atoms/customerAtom';
 
@@ -34,11 +34,13 @@ const CustomerFormPage: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
   
   // Get LINE user ID from URL
-  const lineUserId = searchParams.get('lineUserId');
+  const line_id = searchParams.get('line_id');
+  console.log(line_id);
 
   // Form setup with Mantine useForm
   const form = useForm<CustomerForm>({
     initialValues: {
+      line_id: '',
       lastName: '',
       firstName: '',
       lastNameKana: '',
@@ -75,14 +77,8 @@ const CustomerFormPage: React.FC = () => {
         if (!emailRegex.test(value)) return '正しいメールアドレスを入力してください';
         return null;
       },
-      birthday: (value, values) => {
-        if (isMobile) {
-          if (!values.birthdayYear || !values.birthdayMonth || !values.birthdayDay) {
-            return '生年月日を選択してください';
-          }
-        } else {
-          if (!value) return '生年月日を選択してください';
-        }
+      birthday: (value) => {
+        if (!value) return '生年月日を選択してください';
         return null;
       }
     }
@@ -112,17 +108,39 @@ const CustomerFormPage: React.FC = () => {
     });
   };
 
+  // Update birthday Date when mobile date fields change
+  const updateBirthdayFromMobile = () => {
+    const { birthdayYear, birthdayMonth, birthdayDay } = form.values;
+    if (birthdayYear && birthdayMonth && birthdayDay) {
+      const date = new Date(
+        parseInt(birthdayYear),
+        parseInt(birthdayMonth) - 1,
+        parseInt(birthdayDay)
+      );
+      form.setFieldValue('birthday', date);
+    } else {
+      form.setFieldValue('birthday', null);
+    }
+  };
+
+  // Handle mobile date field changes
+  const handleMobileDateChange = (field: 'birthdayYear' | 'birthdayMonth' | 'birthdayDay', value: string | null) => {
+    form.setFieldValue(field, value || '');
+    // Update birthday after a short delay to ensure all fields are updated
+    setTimeout(updateBirthdayFromMobile, 0);
+  };
+
   // Check if user already exists
   useEffect(() => {
     const checkUser = async () => {
-      if (!lineUserId) {
+      if (!line_id) {
         setError('LINE User IDが見つかりません');
         setCheckingUser(false);
         return;
       }
 
       try {
-        const response = await checkExistingUser(lineUserId);
+        const response = await checkExistingUser(line_id);
         if (response.exists) {
           navigate('/menu');
           return;
@@ -135,7 +153,7 @@ const CustomerFormPage: React.FC = () => {
     };
 
     checkUser();
-  }, [lineUserId, navigate, setCheckingUser, setError]);
+  }, [line_id, navigate, setCheckingUser, setError]);
 
   // Handle form submission
   const handleSubmit = async (values: CustomerForm) => {
@@ -146,23 +164,18 @@ const CustomerFormPage: React.FC = () => {
       // Format phone number (remove hyphens)
       const formattedPhone = values.phone.replace(/-/g, '');
       
-      // Handle birthday based on mobile/desktop
-      let birthdayString = '';
-      if (isMobile) {
-        birthdayString = `${values.birthdayYear}-${values.birthdayMonth}-${values.birthdayDay}`;
-      } else {
-        birthdayString = values.birthday?.toISOString().split('T')[0] || '';
-      }
+      // Convert Date to ISO string format for backend
+      const birthdayString = values.birthday ? values.birthday.toISOString().split('T')[0] : '';
 
-      const customerData = {
-        lineUserId,
+      const customerData: CustomerCreateRequest = {
+        line_id: line_id!,
         lastName: values.lastName,
         firstName: values.firstName,
         lastNameKana: values.lastNameKana,
         firstNameKana: values.firstNameKana,
         phone: formattedPhone,
         email: values.email,
-        birthday: birthdayString
+        birthday: birthdayString,
       };
 
       await createCustomer(customerData);
@@ -266,17 +279,20 @@ const CustomerFormPage: React.FC = () => {
                       placeholder="年"
                       data={yearOptions}
                       searchable
-                      {...form.getInputProps('birthdayYear')}
+                      value={form.values.birthdayYear}
+                      onChange={(value) => handleMobileDateChange('birthdayYear', value)}
                     />
                     <Select
                       placeholder="月"
                       data={monthOptions}
-                      {...form.getInputProps('birthdayMonth')}
+                      value={form.values.birthdayMonth}
+                      onChange={(value) => handleMobileDateChange('birthdayMonth', value)}
                     />
                     <Select
                       placeholder="日"
                       data={getDayOptions()}
-                      {...form.getInputProps('birthdayDay')}
+                      value={form.values.birthdayDay}
+                      onChange={(value) => handleMobileDateChange('birthdayDay', value)}
                     />
                   </Group>
                   {form.errors.birthday && (

@@ -58,20 +58,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
     return `${endHours.toString().padStart(2, "0")}:${endMins.toString().padStart(2, "0")}`;
   };
 
-  // useEffect (() => {
-  //   const result = calculateEndTime("13:00", 60);
-  //   console.log("Calculated End Time:", result);
-  // }, []);
-
-  // const getEndTime = (id: string, reservedSlots: ReservedSlot[]): string | null => {
-  //   for (const slot of reservedSlots) {
-  //     const booking = slot.bookings.find(b => b.id === id);
-  //     if(booking && booking.times.length > 0) {
-  //       return booking.times[booking.times.length - 1];
-  //     }
-  //   }
-  //   return null;
-  // }
 
   const isSlotSelected = (date: Date, time: string) => {
     if (!selectedDate || !selectedTime) return false;
