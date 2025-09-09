@@ -13,8 +13,6 @@ import {
   Select,
   Alert
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle } from '@tabler/icons-react';
 import type { CustomerForm, CustomerCreateRequest } from '../types/customer';
 import { createCustomer } from '../api/customerService';
@@ -27,9 +25,7 @@ const CustomerFormPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useAtom(customerErrorAtom);
 
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const line_id = searchParams.get('line_id');
-  console.log('LINE ID:', line_id);
+  const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
 
   const form = useForm<CustomerForm>({
     initialValues: {
@@ -166,22 +162,34 @@ const CustomerFormPage: React.FC = () => {
                 <TextInput label="名（カナ）" placeholder="タロウ" required {...form.getInputProps('firstNameKana')} />
               </Group>
 
-              <TextInput label="電話番号" placeholder="090-1234-5678" required {...form.getInputProps('phone')} />
+
+              <TextInput
+                label="電話番号"
+                placeholder="090-1234-5678"
+                required
+                value={form.values.phone}
+                onChange={(e) => {
+                  let input = e.target.value.replace(/\D/g, '');
+                  if (input.length > 3 && input.length <= 7) {
+                    input = input.slice(0,3) + '-' + input.slice(3);
+                  } else if (input.length > 7) {
+                    input = input.slice(0,3) + '-' + input.slice(3,7) + '-' + input.slice(7,11);
+                  }
+                  form.setFieldValue('phone', input);
+                }}
+              />
+              
               <TextInput label="メールアドレス" placeholder="example@email.com" type="email" required {...form.getInputProps('email')} />
 
-              {isMobile ? (
-                <Stack gap="xs">
-                  <Text size="sm" fw={500}>生年月日 <Text span c="red">*</Text></Text>
-                  <Group grow>
-                    <Select placeholder="年" data={yearOptions} searchable value={form.values.birthdayYear} onChange={(v) => handleMobileDateChange('birthdayYear', v)} />
-                    <Select placeholder="月" data={monthOptions} value={form.values.birthdayMonth} onChange={(v) => handleMobileDateChange('birthdayMonth', v)} />
-                    <Select placeholder="日" data={getDayOptions()} value={form.values.birthdayDay} onChange={(v) => handleMobileDateChange('birthdayDay', v)} />
-                  </Group>
-                  {form.errors.birthday && <Text size="xs" c="red">{form.errors.birthday}</Text>}
-                </Stack>
-              ) : (
-                <DateInput label="生年月日" placeholder="生年月日を選択してください" required maxDate={new Date()} {...form.getInputProps('birthday')} />
-              )}
+              <Stack gap="xs">
+                <Text size="sm" fw={500}>生年月日 <Text span c="red">*</Text></Text>
+                <Group grow>
+                  <Select placeholder="年" data={yearOptions} searchable value={form.values.birthdayYear} onChange={(v) => handleMobileDateChange('birthdayYear', v)} />
+                  <Select placeholder="月" data={monthOptions} value={form.values.birthdayMonth} onChange={(v) => handleMobileDateChange('birthdayMonth', v)} />
+                  <Select placeholder="日" data={getDayOptions()} value={form.values.birthdayDay} onChange={(v) => handleMobileDateChange('birthdayDay', v)} />
+                </Group>
+                {form.errors.birthday && <Text size="xs" c="red">{form.errors.birthday}</Text>}
+              </Stack>
 
               <Button type="submit" color="pink" size="lg" radius="md" loading={loading}>登録する</Button>
             </Stack>
