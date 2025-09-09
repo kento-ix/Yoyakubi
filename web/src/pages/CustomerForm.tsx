@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from '@mantine/form';
 import {
@@ -11,33 +11,26 @@ import {
   Text,
   Stack,
   Select,
-  Loader,
-  Center,
   Alert
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { useAtom } from 'jotai';
 import type { CustomerForm, CustomerCreateRequest } from '../types/customer';
-import { checkExistingUser, createCustomer } from '../api/customerService';
-import { checkingUserAtom, customerErrorAtom } from '../atoms/customerAtom';
+import { createCustomer } from '../api/customerService';
+import { customerErrorAtom } from '../atoms/customerAtom';
+import { useAtom } from 'jotai';
 
 const CustomerFormPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [checkingUser, setCheckingUser] = useAtom(checkingUserAtom);
   const [error, setError] = useAtom(customerErrorAtom);
-  
-  // Mobile detection
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  
-  // Get LINE user ID from URL
-  const line_id = searchParams.get('line_id');
-  console.log(line_id);
 
-  // Form setup with Mantine useForm
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const line_id = searchParams.get('line_id');
+  console.log('LINE ID:', line_id);
+
   const form = useForm<CustomerForm>({
     initialValues: {
       line_id: '',
@@ -77,105 +70,67 @@ const CustomerFormPage: React.FC = () => {
         if (!emailRegex.test(value)) return '正しいメールアドレスを入力してください';
         return null;
       },
-      birthday: (value) => {
-        if (!value) return '生年月日を選択してください';
-        return null;
-      }
+      birthday: (value) => (!value ? '生年月日を選択してください' : null)
     }
   });
 
-  // Generate year options (1950-2010)
   const yearOptions = Array.from({ length: 61 }, (_, i) => {
     const year = 2010 - i;
     return { value: year.toString(), label: `${year}年` };
   });
 
-  // Generate month options
   const monthOptions = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
     return { value: month.toString().padStart(2, '0'), label: `${month}月` };
   });
 
-  // Generate day options based on selected month and year
   const getDayOptions = () => {
     const year = parseInt(form.values.birthdayYear || '2000');
     const month = parseInt(form.values.birthdayMonth || '1');
     const daysInMonth = new Date(year, month, 0).getDate();
-    
     return Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1;
       return { value: day.toString().padStart(2, '0'), label: `${day}日` };
     });
   };
 
-  // Update birthday Date when mobile date fields change
   const updateBirthdayFromMobile = () => {
     const { birthdayYear, birthdayMonth, birthdayDay } = form.values;
     if (birthdayYear && birthdayMonth && birthdayDay) {
-      const date = new Date(
-        parseInt(birthdayYear),
-        parseInt(birthdayMonth) - 1,
-        parseInt(birthdayDay)
-      );
+      const date = new Date(parseInt(birthdayYear), parseInt(birthdayMonth) - 1, parseInt(birthdayDay));
       form.setFieldValue('birthday', date);
     } else {
       form.setFieldValue('birthday', null);
     }
   };
 
-  // Handle mobile date field changes
   const handleMobileDateChange = (field: 'birthdayYear' | 'birthdayMonth' | 'birthdayDay', value: string | null) => {
     form.setFieldValue(field, value || '');
-    // Update birthday after a short delay to ensure all fields are updated
     setTimeout(updateBirthdayFromMobile, 0);
   };
 
-  // Check if user already exists
-  useEffect(() => {
-    const checkUser = async () => {
-      if (!line_id) {
-        setError('LINE User IDが見つかりません');
-        setCheckingUser(false);
-        return;
-      }
-
-      try {
-        const response = await checkExistingUser(line_id);
-        if (response.exists) {
-          navigate('/menu');
-          return;
-        }
-      } catch (err) {
-        console.error('Error checking user:', err);
-      } finally {
-        setCheckingUser(false);
-      }
-    };
-
-    checkUser();
-  }, [line_id, navigate, setCheckingUser, setError]);
-
-  // Handle form submission
   const handleSubmit = async (values: CustomerForm) => {
+    if (!line_id) {
+      setError('LINE IDがURLに含まれていません');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      // Format phone number (remove hyphens)
       const formattedPhone = values.phone.replace(/-/g, '');
-      
-      // Convert Date to ISO string format for backend
       const birthdayString = values.birthday ? values.birthday.toISOString().split('T')[0] : '';
 
       const customerData: CustomerCreateRequest = {
-        line_id: line_id!,
+        line_id: line_id,
         lastName: values.lastName,
         firstName: values.firstName,
         lastNameKana: values.lastNameKana,
         firstNameKana: values.firstNameKana,
         phone: formattedPhone,
         email: values.email,
-        birthday: birthdayString,
+        birthday: birthdayString
       };
 
       await createCustomer(customerData);
@@ -188,139 +143,47 @@ const CustomerFormPage: React.FC = () => {
     }
   };
 
-  // Show loading while checking user
-  if (checkingUser) {
-    return (
-      <Container size="sm" py="xl">
-        <Center>
-          <Stack align="center">
-            <Loader color="pink" size="lg" />
-            <Text>ユーザー情報を確認中...</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
-  }
-
   return (
     <Container size="sm" py="xl">
       <Paper shadow="md" radius="lg" p="xl">
         <Stack gap="lg">
-          <Title order={2} ta="center" c="pink.6">
-            お客様情報登録
-          </Title>
-          
-          <Text ta="center" c="dimmed">
-            初回のご利用前に、お客様情報をご登録ください
-          </Text>
+          <Title order={2} ta="center" c="pink.6">お客様情報登録</Title>
+          <Text ta="center" c="dimmed">初回のご利用前に、お客様情報をご登録ください</Text>
 
           {error && (
-            <Alert icon={<IconAlertCircle size="1rem" />} color="red">
-              {error}
-            </Alert>
+            <Alert icon={<IconAlertCircle size="1rem" />} color="red">{error}</Alert>
           )}
 
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <Stack gap="md">
-              {/* Name fields */}
               <Group grow>
-                <TextInput
-                  label="姓"
-                  placeholder="山田"
-                  required
-                  {...form.getInputProps('lastName')}
-                />
-                <TextInput
-                  label="名"
-                  placeholder="太郎"
-                  required
-                  {...form.getInputProps('firstName')}
-                />
+                <TextInput label="姓" placeholder="山田" required {...form.getInputProps('lastName')} />
+                <TextInput label="名" placeholder="太郎" required {...form.getInputProps('firstName')} />
               </Group>
 
-              {/* Kana name fields */}
               <Group grow>
-                <TextInput
-                  label="姓（カナ）"
-                  placeholder="ヤマダ"
-                  required
-                  {...form.getInputProps('lastNameKana')}
-                />
-                <TextInput
-                  label="名（カナ）"
-                  placeholder="タロウ"
-                  required
-                  {...form.getInputProps('firstNameKana')}
-                />
+                <TextInput label="姓（カナ）" placeholder="ヤマダ" required {...form.getInputProps('lastNameKana')} />
+                <TextInput label="名（カナ）" placeholder="タロウ" required {...form.getInputProps('firstNameKana')} />
               </Group>
 
-              <TextInput
-                label="電話番号"
-                placeholder="090-1234-5678"
-                required
-                {...form.getInputProps('phone')}
-              />
-
-              <TextInput
-                label="メールアドレス"
-                placeholder="example@email.com"
-                type="email"
-                required
-                {...form.getInputProps('email')}
-              />
+              <TextInput label="電話番号" placeholder="090-1234-5678" required {...form.getInputProps('phone')} />
+              <TextInput label="メールアドレス" placeholder="example@email.com" type="email" required {...form.getInputProps('email')} />
 
               {isMobile ? (
                 <Stack gap="xs">
-                  <Text size="sm" fw={500}>
-                    生年月日 <Text span c="red">*</Text>
-                  </Text>
+                  <Text size="sm" fw={500}>生年月日 <Text span c="red">*</Text></Text>
                   <Group grow>
-                    <Select
-                      placeholder="年"
-                      data={yearOptions}
-                      searchable
-                      value={form.values.birthdayYear}
-                      onChange={(value) => handleMobileDateChange('birthdayYear', value)}
-                    />
-                    <Select
-                      placeholder="月"
-                      data={monthOptions}
-                      value={form.values.birthdayMonth}
-                      onChange={(value) => handleMobileDateChange('birthdayMonth', value)}
-                    />
-                    <Select
-                      placeholder="日"
-                      data={getDayOptions()}
-                      value={form.values.birthdayDay}
-                      onChange={(value) => handleMobileDateChange('birthdayDay', value)}
-                    />
+                    <Select placeholder="年" data={yearOptions} searchable value={form.values.birthdayYear} onChange={(v) => handleMobileDateChange('birthdayYear', v)} />
+                    <Select placeholder="月" data={monthOptions} value={form.values.birthdayMonth} onChange={(v) => handleMobileDateChange('birthdayMonth', v)} />
+                    <Select placeholder="日" data={getDayOptions()} value={form.values.birthdayDay} onChange={(v) => handleMobileDateChange('birthdayDay', v)} />
                   </Group>
-                  {form.errors.birthday && (
-                    <Text size="xs" c="red">
-                      {form.errors.birthday}
-                    </Text>
-                  )}
+                  {form.errors.birthday && <Text size="xs" c="red">{form.errors.birthday}</Text>}
                 </Stack>
               ) : (
-                <DateInput
-                  label="生年月日"
-                  placeholder="生年月日を選択してください"
-                  required
-                  maxDate={new Date()}
-                  {...form.getInputProps('birthday')}
-                />
+                <DateInput label="生年月日" placeholder="生年月日を選択してください" required maxDate={new Date()} {...form.getInputProps('birthday')} />
               )}
 
-              <Button
-                type="submit"
-                color="pink"
-                size="lg"
-                radius="md"
-                loading={loading}
-                mt="md"
-              >
-                登録する
-              </Button>
+              <Button type="submit" color="pink" size="lg" radius="md" loading={loading}>登録する</Button>
             </Stack>
           </form>
         </Stack>

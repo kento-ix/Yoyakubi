@@ -8,7 +8,7 @@ export const createCustomer = async (customerData: CustomerCreateRequest) => {
   return response.data;
 };
 
-export const checkExistingUser = async (lineUserId: string) => {
-  const response = await axios.get(`http://localhost:8000/api/customers/check/${lineUserId}`);
-  return response.data;
-};
+// export const checkExistingUser = async (lineUserId: string) => {
+//   const response = await axios.get(`http://localhost:8000/api/customers/check/${lineUserId}`);
+//   return response.data;
+// };
