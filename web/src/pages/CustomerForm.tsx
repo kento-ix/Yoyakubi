@@ -14,9 +14,9 @@ import {
   Alert
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import type { CustomerForm, CustomerCreateRequest } from '../types/customer';
-import { createCustomer } from '../api/customerService';
-import { customerErrorAtom } from '../atoms/customerAtom';
+import type { CustomerForm, CustomerCreateRequest } from '@/types/customer';
+import { createCustomer } from '@/api/customerService';
+import { customerErrorAtom } from '@/atoms/customerAtom';
 import { useAtom } from 'jotai';
 
 const CustomerFormPage: React.FC = () => {

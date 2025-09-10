@@ -10,11 +10,11 @@ import {
 } from "../atoms/dateAtom";
 import { Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
-import { selectedServiceAtom } from "../atoms/serviceAtom";
+import { selectedServiceAtom } from "@/atoms/serviceAtom";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchReservedSlots } from "../api/calendarApi";
-import type { ReservedSlot } from "../types/date";
+import { fetchReservedSlots } from "@/api/calendarApi";
+import type { ReservedSlot } from "@/types/date";
 
 dayjs.locale("ja");
 

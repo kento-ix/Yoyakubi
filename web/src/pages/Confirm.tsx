@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
-import { postReserve } from "../api/calendarApi";
+import { postReserve } from "@/api/calendarApi";
 
 interface ReservationData {
   date: string;

@@ -16,7 +16,7 @@ import {
     Divider
 } from '@mantine/core';
 import { IconClock, IconCurrencyYen, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
-import { services } from '../data/service';
+import { services } from '@/data/service';
 
 const MenuSelection: React.FC = () => {
     const navigate = useNavigate();

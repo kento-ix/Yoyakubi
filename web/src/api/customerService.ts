@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { CustomerCreateRequest } from '../types/customer';
+import type { CustomerCreateRequest } from '@/types/customer';
 
 const API_URL = "http://localhost:8000/api/customers/user_form";
 
