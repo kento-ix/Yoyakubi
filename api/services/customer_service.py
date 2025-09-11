@@ -4,7 +4,7 @@ from model.customer import CustomerCreate
 
 def create_customer(db: Session, customer: CustomerCreate):
     db_user = User(
-        line_id=customer.lineUserId,
+        line_id=customer.line_id,
         last_name=customer.lastName,
         first_name=customer.firstName,
         phone_number=customer.phone,

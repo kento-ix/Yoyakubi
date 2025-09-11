@@ -67,7 +67,11 @@ def handle_message(event):
                 ]
             )
             template_message = TemplateSendMessage(alt_text="登録ページへ", template=buttons)
+
         else:
+            text_message = TextSendMessage(
+                text="当日予約をご希望の際は直接店舗までご連絡ください。\n xxx-xxxx-xxxx"
+            )
             buttons = ButtonsTemplate(
                 title="予約メニュー",
                 text="予約するメニューを選択してください",
