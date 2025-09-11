@@ -6,11 +6,17 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
     TemplateSendMessage, ButtonsTemplate, URITemplateAction
 )
+from services.reserve_flow import (
+    flow_reserve,
+    flow_check_reservation,
+    flow_setting,
+    flow_default,
+)
 
 from sqlalchemy.orm import Session
 from core.config import settings
 from db.database import get_db
-from model.orm_reservation import User
+from model.orm_reservation import User, Reserve
 
 router = APIRouter()
 
@@ -45,43 +51,21 @@ def handle_message(event):
     user_line_id = event.source.user_id
     print("ユーザー発言:", incoming_text, "LINE ID:", user_line_id)
 
+    from db.database import SessionLocal
+    db = SessionLocal()
+
     if incoming_text == "予約する":
-        db: Session = getattr(event.source, "db", None)
-        if db is None:
-            from db.database import SessionLocal
-            db = SessionLocal()
-            
-        user = db.query(User).filter(User.line_id == user_line_id).first()
+        messages = flow_reserve(user_line_id, db)
+        client_line_api.reply_message(event.reply_token, messages)
 
-        if user is None:
-            register_url_with_id = f"{REGISTER_URL}?line_id={user_line_id}"
+    elif incoming_text == "予約確認":
+        reply = flow_check_reservation(user_line_id, db)
+        client_line_api.reply_message(event.reply_token, reply)
 
-            text_message = TextSendMessage(
-                text="当日予約をご希望の際は直接店舗までご連絡ください。\n xxx-xxxx-xxxx"
-            )
-            buttons = ButtonsTemplate(
-                title="未登録ユーザー",
-                text="まずは登録をお願いします",
-                actions=[
-                    URITemplateAction(label="登録する", uri=register_url_with_id)
-                ]
-            )
-            template_message = TemplateSendMessage(alt_text="登録ページへ", template=buttons)
+    elif incoming_text == "設定":
+        reply = flow_setting(user_line_id, db)
+        client_line_api.reply_message(event.reply_token, reply)
 
-        else:
-            text_message = TextSendMessage(
-                text="当日予約をご希望の際は直接店舗までご連絡ください。\n xxx-xxxx-xxxx"
-            )
-            buttons = ButtonsTemplate(
-                title="予約メニュー",
-                text="予約するメニューを選択してください",
-                actions=[
-                    URITemplateAction(label="メニューを見る", uri=MENU_URL)
-                ]
-            )
-            template_message = TemplateSendMessage(alt_text="メニューへ", template=buttons)
-
-        client_line_api.reply_message(event.reply_token, [text_message, template_message])
     else:
-        reply = TextSendMessage(text="「予約する」と送信してください")
+        reply = flow_default()
         client_line_api.reply_message(event.reply_token, reply)
