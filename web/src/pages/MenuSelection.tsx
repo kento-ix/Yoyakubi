@@ -13,20 +13,23 @@ import {
     SimpleGrid,
     Collapse,
     Button,
-    Divider
+    Divider,
 } from '@mantine/core';
-import { IconClock, IconCurrencyYen, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { services } from '@/data/service';
 
 const MenuSelection: React.FC = () => {
     const navigate = useNavigate();
     const [selectedService] = useAtom(selectedServiceAtom);
-    const [, setSelectedService] = useAtom(setSelectedServiceAtom); // 永続化用
+    const [, setSelectedService] = useAtom(setSelectedServiceAtom);
 
     const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
-        'ハンド': false,
-        'フット': false,
-        'オプション': false
+        'ジェル': false,
+        'マニキュア': false,
+        'フットジェル': false,
+        'フットマニキュア': false,
+        'オフ': false,
+        'その他': false
     });
 
     const handleServiceSelect = (service: typeof services[number]) => {
@@ -50,22 +53,26 @@ const MenuSelection: React.FC = () => {
         }));
     };
 
-    const getCategoryColor = (category: string) => {
-        switch (category) {
-        case 'ハンド': return 'pink';
-        case 'フット': return 'blue';
-        case 'オプション': return 'green';
-        default: return 'gray';
+    const getCategoryColor = (categoryType: string) => {
+        switch (categoryType) {
+            case 'ジェル': return 'pink';
+            case 'マニキュア': return 'pink';
+            case 'フットジェル': return 'blue';
+            case 'フットマニキュア': return 'blue';
+            default: return 'green';
         }
     };
 
-    const servicesByCategory = services.reduce((acc, service) => {
-        if (!acc[service.category]) acc[service.category] = [];
-        acc[service.category].push(service);
+    const servicesByType = services.reduce((acc, service) => {
+        if (service.category === 'オプション') return acc;
+        if (!acc[service.type]) acc[service.type] = [];
+        acc[service.type].push(service);
         return acc;
     }, {} as Record<string, typeof services>);
 
-    const categories = ['ハンド', 'フット', 'オプション'];
+    const optionServices = services.filter(service => service.category === 'オプション');
+
+    const categories = ['ジェル', 'マニキュア', 'フットジェル', 'フットマニキュア', 'オフ', 'その他'];
 
     return (
         <Stack gap="lg">
@@ -78,28 +85,36 @@ const MenuSelection: React.FC = () => {
                 </Text>
             </div>
 
-            {categories.map((category) => (
-                <Paper key={category} shadow="sm" radius="md" withBorder>
+            {categories.map((categoryType) => (
+                <Paper key={categoryType} shadow="sm" radius="md" withBorder>
                     <Group
                         justify="space-between"
                         p="md"
                         style={{ cursor: 'pointer' }}
-                        onClick={() => toggleCategory(category)}
+                        onClick={() => toggleCategory(categoryType)}
                     >
                         <Stack gap="sm">
-                            <Badge color={getCategoryColor(category)} size="lg" variant="filled">
-                                {category}
-                            </Badge>
-                            <Text fw={600} size="lg">{category}メニュー</Text>
+                            <Text fw={600} size="lg">{categoryType}</Text>
                         </Stack>
-                        {openCategories[category] ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
+
+                        <Group>
+                            {(categoryType === 'ジェル' || categoryType === 'マニキュア') && (
+                            <Badge color="pink" size="lg">ハンド</Badge>
+                            )}
+                            {(categoryType === 'フットジェル' || categoryType === 'フットマニキュア') && (
+                            <Badge color="blue" size="lg">フット</Badge>
+                            )}
+
+                            {openCategories[categoryType] ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
+                        </Group>
+
                     </Group>
 
-                    <Collapse in={openCategories[category]}>
+                    <Collapse in={openCategories[categoryType]}>
                         <Divider />
                         <div style={{ padding: '1rem' }}>
                             <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
-                                {servicesByCategory[category]?.map((service) => (
+                                {servicesByType[categoryType]?.map((service) => (
                                     <Card
                                         key={service.id}
                                         shadow="sm"
@@ -109,10 +124,10 @@ const MenuSelection: React.FC = () => {
                                         style={{
                                             cursor: 'pointer',
                                             border: selectedService.some((s) => s.id === service.id) 
-                                                ? `2px solid var(--mantine-color-${getCategoryColor(category)}-6)` 
+                                                ? `2px solid var(--mantine-color-${getCategoryColor(categoryType)}-6)` 
                                                 : undefined,
                                             backgroundColor: selectedService.some((s) => s.id === service.id) 
-                                                ? `var(--mantine-color-${getCategoryColor(category)}-0)` 
+                                                ? `var(--mantine-color-${getCategoryColor(categoryType)}-0)` 
                                                 : undefined,
                                         }}
                                         onClick={() => handleServiceSelect(service)}
@@ -120,17 +135,11 @@ const MenuSelection: React.FC = () => {
                                         <Stack gap="sm">
                                             <div>
                                                 <Text fw={600} size="lg">{service.name}</Text>
-                                                <Text size="sm" c="dimmed" mt={4}>{service.description}</Text>
+                                                <Text size="sm" fw={600}>￥{service.price.toLocaleString()}</Text>
                                             </div>
-
-                                            <Group justify="space-between" mt="md">
+                                            <Group justify="flex-end" mt="sm">
                                                 <Group gap="xs">
-                                                    <IconClock size={16} color="var(--mantine-color-gray-6)" />
-                                                    <Text size="sm" c="dimmed">{service.duration}分</Text>
-                                                </Group>
-                                                <Group gap="xs">
-                                                    <IconCurrencyYen size={16} color="var(--mantine-color-gray-6)" />
-                                                    <Text size="sm" fw={600}>{service.price.toLocaleString()}円</Text>
+                                                    <Text size="sm" c="dimmed" mt={4}>{service.description}</Text>
                                                 </Group>
                                             </Group>
                                         </Stack>
@@ -141,6 +150,45 @@ const MenuSelection: React.FC = () => {
                     </Collapse>
                 </Paper>
             ))}
+
+            {/* Option components */}
+            <Text fw={600} size="lg" ta="center" bg={'gray.2'} p={6} style={{ borderRadius: 8 }}>オプションメニュー</Text>
+            {optionServices.length > 0 && (
+                <Stack gap="sm">
+                    {optionServices.map((service) => (
+                        <Card
+                            key={service.id}
+                            shadow="sm"
+                            padding="lg"
+                            radius="md"
+                            withBorder
+                            style={{
+                                cursor: 'pointer',
+                                border: selectedService.some((s) => s.id === service.id)
+                                    ? '2px solid var(--mantine-color-green-6)'
+                                    : undefined,
+                                backgroundColor: selectedService.some((s) => s.id === service.id)
+                                    ? 'var(--mantine-color-green-0)'
+                                    : undefined,
+                            }}
+                            onClick={() => handleServiceSelect(service)}
+                        >
+                            <Group>
+                                <div>
+                                    <Text fw={500}>{service.name}</Text>
+                                    <Text size="sm" fw={600}>
+                                        {service.price === 0 ? '' : `¥${service.price.toLocaleString()}`}
+                                    </Text>
+                                </div>
+                                <Group gap="xs">
+                                    <Text size="sm" c="dimmed">{service.description}</Text>
+                                </Group>
+                            </Group>
+                        </Card>
+                    ))}
+                </Stack>
+            )}
+
 
             {selectedService.length > 0 && (
                 <Paper p="md" bg="pink.0" radius="md" withBorder>

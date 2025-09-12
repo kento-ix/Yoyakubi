@@ -5,4 +5,5 @@ export interface ServiceMenu {
   duration: number;
   price: number;
   category: string;
+  type: string;
 }
