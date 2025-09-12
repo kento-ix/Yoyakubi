@@ -1,10 +1,10 @@
 import type { ServiceMenu } from "../types/menu";
 
 export const services: ServiceMenu[] = [
-    // ハンド：ジェル
+  // ハンド：ジェル
     {
       id: 'hand-gel-clear',
-      name: 'クリアジェル',
+      name: 'クリアジェル (ハンド)',
       description: '透明感のある艶仕立てで自爪を美しく保護するクリアジェル。',
       duration: 60,
       price: 5600,
@@ -13,7 +13,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-onecolor',
-      name: 'ワンカラージェル',
+      name: 'ワンカラージェル (ハンド)',
       description: '指先を美しく彩るシンプルなワンカラーネイル。上品なツヤ感が魅力。',
       duration: 120,
       price: 6000,
@@ -22,7 +22,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-lame',
-      name: 'ラメグラデーション',
+      name: 'ラメグラデーション (ハンド)',
       description: '繊細なラメが指先を華やかに演出。上品でキラキラ輝く仕上がりに。',
       duration: 75,
       price: 6000,
@@ -31,7 +31,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-french',
-      name: 'フレンチジェル',
+      name: 'フレンチジェル (ハンド)',
       description: '洗礼されたデザインで指先を美しく。シンプルで上品なフレンチネイル。',
       duration: 75,
       price: 6800,
@@ -40,18 +40,18 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-gradation',
-      name: 'カラーグラデーション',
+      name: 'カラーグラデーション (ハンド)',
       description: '自然な色の移り変わりが魅力。指先を美しく演出する上品なデザイン。',
       duration: 75,
       price: 7000,
       category: 'ハンド',
       type: 'ジェル'
     },
-    //　ハンド：マニキュア
 
+    // ハンド：マニキュア
     {
       id: 'hand-polish-clear',
-      name: 'クリアマニキュア',
+      name: 'クリアマニキュア (ハンド)',
       description: '透明感のある艶仕立てで自爪を美しく保護するクリアジェル。',
       duration: 60,
       price: 5600,
@@ -60,7 +60,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-polish-onecolor',
-      name: 'ワンカラーマニキュア',
+      name: 'ワンカラーマニキュア (ハンド)',
       description: '指さくを美しくシンプルなワンカラーネイル。上品なツヤ感が魅力',
       duration: 60,
       price: 5500,
@@ -69,17 +69,18 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-polish-french',
-      name: 'フレンチマニキュア',
+      name: 'フレンチマニキュア (ハンド)',
       description: '上品で洗礼されたデザイン。オフィスや特別なシーンのもおすすめ。',
       duration: 60,
       price: 6000,
       category: 'ハンド',
       type: 'マニキュア'
     },
+
     // フットメニュー:ジェル
     {
       id: 'foot-gel-clear',
-      name: 'クリアジェル',
+      name: 'クリアジェル (フット)',
       description: '透明感のあるクリアジェルで、足元を自然に美しく保護。艶感がある引き立ち、上品な仕上がりに。',
       duration: 90,
       price: 6000,
@@ -88,7 +89,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-gel-onecolor',
-      name: 'ワンカラージェル',
+      name: 'ワンカラージェル (フット)',
       description: '足元を美しく彩るワンカラーネイル。シンプルながら華やかな仕上がり。',
       duration: 120,
       price: 6500,
@@ -97,17 +98,18 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-gel-french',
-      name: 'フレンチジェル',
+      name: 'フレンチジェル (フット)',
       description: '上品なフレンチネイルで足元をエレガントに。オフィスやお出かけにも◎',
       duration: 60,
       price: 6800,
       category: 'フット',
       type: 'フットジェル'
     },
+
     // フットメニュー:マニキュア
     {
       id: 'foot-polish-clear',
-      name: 'クリアマニキュア',
+      name: 'クリアマニキュア (フット)',
       description: '透明感のあるクリアジェルで、足元を自然に美しく保護。艶感がある引き立ち、上品な仕上がりに。',
       duration: 90,
       price: 5500,
@@ -116,7 +118,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-polish-onecolor',
-      name: 'ワンカラーマニキュア',
+      name: 'ワンカラーマニキュア (フット)',
       description: '足元を美しく彩るワンカラーネイル。シンプルながら華やかな仕上がり。',
       duration: 120,
       price: 6000,
@@ -125,14 +127,13 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-polish-french',
-      name: 'フレンチマニキュア',
+      name: 'フレンチマニキュア (フット)',
       description: '上品なフレンチデザイン。指先を美しく際立たせ、オフィスや特別なシーンにもおすすめ。',
       duration: 60,
       price: 6500,
       category: 'フット',
       type: 'フットマニキュア'
     },
-
     // オフ
     {
       id: 'off-own-polish',

@@ -13,7 +13,7 @@ import {
     SimpleGrid,
     Collapse,
     Button,
-    Divider,
+    Divider,    
 } from '@mantine/core';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { services } from '@/data/service';
