@@ -6,7 +6,6 @@ import {
   Button,
   Group,
   Container,
-  Paper,
   Title,
   Text,
   Stack,
@@ -141,7 +140,7 @@ const CustomerFormPage: React.FC = () => {
 
   return (
     <Container size="sm" py="xl">
-      <Paper shadow="md" radius="lg" p="xl">
+      <>
         <Stack gap="lg">
           <Title order={2} ta="center" c="pink.6">お客様情報登録</Title>
           <Text ta="center" c="dimmed">初回のご利用前に、お客様情報をご登録ください</Text>
@@ -195,7 +194,7 @@ const CustomerFormPage: React.FC = () => {
             </Stack>
           </form>
         </Stack>
-      </Paper>
+      </>
     </Container>
   );
 };
