@@ -7,7 +7,8 @@ import {
   weekDaysAtom,
   selectedDateAtom,
   selectedTimeAtom,
-} from "../atoms/dateAtom";
+  setSelectedDateTimeAtom,
+} from "@/atoms/dateAtom";
 import { Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { selectedServiceAtom } from "@/atoms/serviceAtom";
@@ -27,8 +28,9 @@ interface CalendarProps {
 const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
   const [weekStartDate, setWeekStartDate] = useAtom(weekStartDateAtom);
   const [weekDays] = useAtom(weekDaysAtom);
-  const [selectedDate, setSelectedDate] = useAtom(selectedDateAtom);
-  const [selectedTime, setSelectedTime] = useAtom(selectedTimeAtom);
+  const [selectedDate] = useAtom(selectedDateAtom);
+  const [selectedTime] = useAtom(selectedTimeAtom);
+  const [, setSelectedDateTime] = useAtom(setSelectedDateTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
   const navigate = useNavigate();
   const [reservedSlots, setReservedSlots] = useState<ReservedSlot[]>([]);
@@ -85,8 +87,7 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
     }
     
     const dateStr = dayjs(date).format("YYYY-MM-DD");
-    setSelectedDate(dateStr);
-    setSelectedTime(time);
+    setSelectedDateTime({ date: dateStr, time });
   };
 
   

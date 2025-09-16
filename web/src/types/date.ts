@@ -7,6 +7,12 @@ export interface WeekDay {
   isPast: boolean;
 }
 
+export interface StoredDateTime {
+  date: string | null;
+  time: string | null;
+  expiresAt: number;
+}
+
 interface Booking {
   id: string;
   title: string;

@@ -6,6 +6,7 @@ import MenuSelection from "@/pages/MenuSelection";
 import ReservationConfirm from "@/pages/Confirm";
 import ReservationComplete from "@/pages/ReservationComplete";
 import StepperComponent from "@/components/stepper/Stepper";
+import Test from "@/pages/test";
 
 import Calendar from "@/pages/Calendar";
 
@@ -19,6 +20,12 @@ function App() {
             // <StepperComponent>
               <CustomerForm/>
             // </StepperComponent>
+          }
+        />
+        <Route
+          path="/test-page"
+          element={
+            <Test/>
           }
         />
         {/* <Route path="/customer-form" element={<CustomerForm />} /> */}

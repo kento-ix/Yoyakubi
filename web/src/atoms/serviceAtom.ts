@@ -1,13 +1,9 @@
 import { atom } from "jotai";
-import type { ServiceMenu } from "../types/menu";
-
-interface StoredServices {
-  services: ServiceMenu[];
-  expiresAt: number;
-}
+import type { ServiceMenu, StoredServices } from "@/types/menu";
 
 const EXPIRATION_MINUTES = 30;
 
+// load data from localstorage
 const loadInitial = (): ServiceMenu[] => {
   const raw = localStorage.getItem("selectedServices");
   if (!raw) return [];
@@ -23,6 +19,7 @@ const loadInitial = (): ServiceMenu[] => {
   }
 };
 
+// declare atom to use within app
 export const selectedServiceAtom = atom<ServiceMenu[]>(loadInitial());
 
 export const setSelectedServiceAtom = atom(

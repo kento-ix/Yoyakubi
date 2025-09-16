@@ -7,3 +7,9 @@ export interface ServiceMenu {
   category: string;
   type: string;
 }
+
+// to store localStorage
+export interface StoredServices {
+  services: ServiceMenu[];
+  expiresAt: number;
+}

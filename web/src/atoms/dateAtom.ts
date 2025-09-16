@@ -1,6 +1,8 @@
 // atoms/dateAtom.ts
 import { atom } from "jotai";
-import type { WeekDay } from "../types/date";
+import type { WeekDay, StoredDateTime } from "@/types/date";
+
+const EXPIRATION_MINUTES = 30;
 
 const generateWeekDays = (startDate: Date): WeekDay[] => {
   const jstStart = new Date(
@@ -28,13 +30,40 @@ const generateWeekDays = (startDate: Date): WeekDay[] => {
   return weekDays;
 };
 
-// Atom: current week start date
-export const weekStartDateAtom = atom<Date>(new Date());
 
-// Derived atom: weekDays from current weekStartDate
+const loadInitial = (): { date: string | null; time: string | null } => {
+  const raw = localStorage.getItem("selectedDateTime");
+  if (!raw) return { date: null, time: null };
+  try {
+    const parsed: StoredDateTime = JSON.parse(raw);
+    if (Date.now() > parsed.expiresAt) {
+      localStorage.removeItem("selectedDateTime");
+      return { date: null, time: null };
+    }
+    return { date: parsed.date, time: parsed.time };
+  } catch {
+    return { date: null, time: null };
+  }
+};
+
+// Starting Date data
+export const weekStartDateAtom = atom<Date>(new Date());
 export const weekDaysAtom = atom((get) => generateWeekDays(get(weekStartDateAtom)));
 
-// Selected date/time atoms
-export const selectedDateAtom = atom<string | null>(null);
-export const selectedTimeAtom = atom<string | null>(null);
+// declare atom to use within app
+export const selectedDateAtom = atom<string | null>(loadInitial().date);
+export const selectedTimeAtom = atom<string | null>(loadInitial().time);
 
+
+// set serices to this atom and save expration time
+export const setSelectedDateTimeAtom = atom(
+  null,
+  (_get, set, { date, time }: { date: string | null; time: string | null }) => {
+    const expiresAt = Date.now() + EXPIRATION_MINUTES * 60 * 1000;
+    const data: StoredDateTime = { date, time, expiresAt };
+    localStorage.setItem("selectedDateTime", JSON.stringify(data));
+
+    set(selectedDateAtom, date);
+    set(selectedTimeAtom, time);
+  }
+);
