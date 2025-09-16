@@ -36,15 +36,19 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
   const [reservedSlots, setReservedSlots] = useState<ReservedSlot[]>([]);
 
   useEffect(() => {
-    fetchReservedSlots()
-      .then(data => {
+    const loadReservedSlots = async () => {
+      try {
+        const data = await fetchReservedSlots();
         console.log("Response data:", data);
         if (data.success) setReservedSlots(data.reserved_slots);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Error in Calendar:", err);
-      });
+      }
+    };
+
+    loadReservedSlots();
   }, []);
+
 
 
   // get duration
@@ -130,19 +134,6 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
 
   const handleNext = () => {
     if (selectedDate && selectedTime && selectedServices.length > 0) {
-      const endTime = calculateEndTime(selectedTime, totalDuration);
-      const reservationData = {
-        date: selectedDate,
-        time: selectedTime,
-        endTime: endTime,
-        services: selectedServices,
-        totalDuration: totalDuration,
-        totalPrice: selectedServices.reduce(
-          (acc, service) => acc + service.price,
-          0
-        ),
-      };
-      localStorage.setItem("reservationData", JSON.stringify(reservationData));
       navigate("/confirm");
     }
   };

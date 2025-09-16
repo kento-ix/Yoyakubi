@@ -1,46 +1,61 @@
-// ReserveConfirm.tsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
+import { useAtom } from "jotai";
+import { selectedDateAtom, selectedTimeAtom } from "@/atoms/dateAtom";
+import { selectedServiceAtom } from "@/atoms/serviceAtom";
 import { postReserve } from "@/api/calendarApi";
-
-interface ReservationData {
-  date: string;
-  time: string;
-  endTime: string;
-  services: {
-    id: number;
-    service_name: string;
-    description: string;
-    duration: number;
-    price: number;
-    category: string;
-  }[];
-  totalDuration: number;
-  totalPrice: number;
-}
+import type { ReservationData } from "@/types/confirm";
 
 const ReservationConfirm: React.FC = () => {
   const navigate = useNavigate();
-  const [reservationData, setReservationData] = useState<ReservationData | null>(
-    null
-  );
+  const [selectedDate] = useAtom(selectedDateAtom);
+  const [selectedTime] = useAtom(selectedTimeAtom);
+  const [selectedServices] = useAtom(selectedServiceAtom);
 
-  useEffect(() => {
-    const data = localStorage.getItem("reservationData");
-    if (data) {
-      setReservationData(JSON.parse(data));
-    }
-  }, []);
+  // Calculate end time based on start time and total duration
+  const calculateEndTime = (startTime: string, duration: number): string => {
+    const [hours, minutes] = startTime.split(":").map(Number);
+    const totalMinutes = hours * 60 + minutes + duration;
+    const endHours = Math.floor(totalMinutes / 60);
+    const endMins = totalMinutes % 60;
+    return `${endHours.toString().padStart(2, "0")}:${endMins.toString().padStart(2, "0")}`;
+  };
 
-  const handleConfirm = async () => {
+  // calculate reservationData
+  const reservationData: ReservationData | null =
+    selectedDate && selectedTime && selectedServices.length > 0
+      ? (() => {
+          const totalDuration = selectedServices.reduce((acc, service) => acc + service.duration, 0);
+          const totalPrice = selectedServices.reduce((acc, service) => acc + service.price, 0);
+          const endTime = calculateEndTime(selectedTime, totalDuration);
+
+          return {
+            date: selectedDate,
+            time: selectedTime,
+            endTime,
+            services: selectedServices.map(service => ({
+              id: service.id,
+              service_name: service.name,
+              description: service.description,
+              duration: service.duration,
+              price: service.price,
+              category: service.category,
+            })),
+            totalDuration,
+            totalPrice,
+          };
+        })()
+      : null;
+
+  const handleConfirm = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!reservationData) return;
 
     try {
       const result = await postReserve(reservationData);
       console.log("予約成功:", result);
-
       navigate("/complete");
     } catch (error) {
       console.error("予約失敗:", error);
@@ -62,62 +77,72 @@ const ReservationConfirm: React.FC = () => {
   return (
     <div style={{ maxWidth: 600, margin: "0 auto" }}>
       <Paper p="lg" shadow="sm" radius="md" withBorder>
-        <Stack gap="sm">
-          <Text fw={700} size="xl" c="pink.7" ta="center">
-            予約内容確認
-          </Text>
+        <form onSubmit={handleConfirm}>
+          {/* Hidden form inputs for reservation data */}
+          <input type="hidden" name="date" value={reservationData.date} />
+          <input type="hidden" name="time" value={reservationData.time} />
+          <input type="hidden" name="endTime" value={reservationData.endTime} />
+          <input type="hidden" name="totalDuration" value={reservationData.totalDuration.toString()} />
+          <input type="hidden" name="totalPrice" value={reservationData.totalPrice.toString()} />
+          <input type="hidden" name="services" value={JSON.stringify(reservationData.services)} />
 
-          <Divider my="sm" />
-
-          <Stack gap="xs">
-            <Text fw={600} c="pink.8">選択メニュー</Text>
-            {reservationData.services.map((service) => (
-              <Group key={service.id} justify="space-between">
-                <div>
-                  <Text fw={500}>{service.service_name}</Text>
-                  <Text size="sm" c="dimmed">
-                    {service.duration}分
-                  </Text>
-                </div>
-                <Text fw={600}>¥{service.price.toLocaleString()}</Text>
-              </Group>
-            ))}
-          </Stack>
-
-          <Divider my="sm" />
-
-          <Group justify="space-between">
-            <Text fw={700}>所用時間</Text>
-            <Text fw={700}>{reservationData.totalDuration}分</Text>
-          </Group>
-          <Group justify="space-between">
-            <Text fw={700}>合計金額</Text>
-            <Text fw={700} c="pink.8">
-              ¥{reservationData.totalPrice.toLocaleString()}
+          <Stack gap="sm">
+            <Text fw={700} size="xl" c="pink.7" ta="center">
+              予約内容確認
             </Text>
-          </Group>
 
-          <Divider my="sm" />
+            <Divider my="sm" />
 
-          <Stack gap="xs">
-            <Text fw={600} c="pink.8">予約日時</Text>
-            <Text>日付: {dayjs(reservationData.date).format("YYYY年MM月DD日(ddd)")}</Text>
-            <Text>
-              時間: {reservationData.time} - {reservationData.endTime}
-            </Text>
+            <Stack gap="xs">
+              <Text fw={600} c="pink.8">選択メニュー</Text>
+              {reservationData.services.map((service) => (
+                <Group key={service.id} justify="space-between">
+                  <div>
+                    <Text fw={500}>{service.service_name}</Text>
+                    <Text size="sm" c="dimmed">
+                      {service.duration}分
+                    </Text>
+                  </div>
+                  <Text fw={600}>¥{service.price.toLocaleString()}</Text>
+                </Group>
+              ))}
+            </Stack>
+
+            <Divider my="sm" />
+
+            <Group justify="space-between">
+              <Text fw={700}>所用時間</Text>
+              <Text fw={700}>{reservationData.totalDuration}分</Text>
+            </Group>
+            <Group justify="space-between">
+              <Text fw={700}>合計金額</Text>
+              <Text fw={700} c="pink.8">
+                ¥{reservationData.totalPrice.toLocaleString()}
+              </Text>
+            </Group>
+
+            <Divider my="sm" />
+
+            <Stack gap="xs">
+              <Text fw={600} c="pink.8">予約日時</Text>
+              <Text>日付: {dayjs(reservationData.date).format("YYYY年MM月DD日(ddd)")}</Text>
+              <Text>
+                時間: {reservationData.time} - {reservationData.endTime}
+              </Text>
+            </Stack>
+
+            <Divider my="sm" />
+
+            <Group grow mt="md">
+              <Button variant="outline" color="gray" onClick={() => navigate("/datetime")}>
+                戻る
+              </Button>
+              <Button type="submit" color="pink">
+                予約を確定する
+              </Button>
+            </Group>
           </Stack>
-
-          <Divider my="sm" />
-
-          <Group grow mt="md">
-            <Button variant="outline" color="gray" onClick={() => navigate("/datetime")}>
-              戻る
-            </Button>
-            <Button color="pink" onClick={handleConfirm}>
-              予約を確定する
-            </Button>
-          </Group>
-        </Stack>
+        </form>
       </Paper>
     </div>
   );
