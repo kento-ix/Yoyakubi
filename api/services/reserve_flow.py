@@ -10,9 +10,9 @@ MENU_URL = "https://yoyakubi.vercel.app/menu"
 
 
 def flow_reserve(user_line_id: str, db):
-
-    """Reserve flow"""
-
+    """
+    Reserve flow
+    """
     user = db.query(User).filter(User.line_id == user_line_id).first()
 
     if user is None:
@@ -45,9 +45,9 @@ def flow_reserve(user_line_id: str, db):
 
 
 def flow_check_reservation(user_line_id: str, db):
-
-    """Reserve check flow"""
-
+    """
+    Reserve check flow
+    """
     user = db.query(User).filter(User.line_id == user_line_id).first()
 
     if user is None:
@@ -63,9 +63,9 @@ def flow_check_reservation(user_line_id: str, db):
 
 
 def flow_setting(user_line_id: str, db):
-
-    """Setting flow(user info update or register)"""
-
+    """
+    Setting flow(user info update or register)
+    """
     user = db.query(User).filter(User.line_id == user_line_id).first()
 
     if user:
@@ -90,7 +90,8 @@ def flow_setting(user_line_id: str, db):
 
 
 def flow_default():
-
-    """Other than that"""
+    """
+    Other than that
+    """
 
     return TextSendMessage(text="ご要望をメニューから選択してください")
