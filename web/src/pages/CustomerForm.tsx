@@ -20,10 +20,10 @@ import { useAtom } from 'jotai';
 
 const CustomerFormPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useAtom(customerErrorAtom);
-
+  
+  const [searchParams] = useSearchParams();
   const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
 
   const form = useForm<CustomerForm>({

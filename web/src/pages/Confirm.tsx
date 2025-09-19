@@ -7,12 +7,16 @@ import { selectedDateAtom, selectedTimeAtom } from "@/atoms/dateAtom";
 import { selectedServiceAtom } from "@/atoms/serviceAtom";
 import { postReserve } from "@/api/calendarApi";
 import type { ReservationData } from "@/types/confirm";
+import { useSearchParams } from "react-router-dom";
 
 const ReservationConfirm: React.FC = () => {
   const navigate = useNavigate();
   const [selectedDate] = useAtom(selectedDateAtom);
   const [selectedTime] = useAtom(selectedTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
+
+  const [searchParams] = useSearchParams();
+  const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
 
   // Calculate end time based on start time and total duration
   const calculateEndTime = (startTime: string, duration: number): string => {
@@ -25,7 +29,7 @@ const ReservationConfirm: React.FC = () => {
 
   // calculate reservationData
   const reservationData: ReservationData | null =
-    selectedDate && selectedTime && selectedServices.length > 0
+    selectedDate && selectedTime && selectedServices.length > 0 && line_id
       ? (() => {
           const totalDuration = selectedServices.reduce((acc, service) => acc + service.duration, 0);
           const totalPrice = selectedServices.reduce((acc, service) => acc + service.price, 0);
@@ -45,6 +49,7 @@ const ReservationConfirm: React.FC = () => {
             })),
             totalDuration,
             totalPrice,
+            line_id: line_id,
           };
         })()
       : null;
