@@ -2,8 +2,15 @@ from core.google_calendar import get_calendar_service
 from core.config import settings
 from datetime import datetime, timedelta
 import pytz
+from model.orm_reservation import Reserve
+from sqlalchemy.orm import Session
+from typing import Dict, Any
+
 
 def get_reserved_slots_service():
+    """
+    Get event weekly from Google Calendar
+    """
     tz = pytz.timezone("Asia/Tokyo")
     today = datetime.now(tz)
     end_day = today + timedelta(days=6, hours=23, minutes=59, seconds=59)
@@ -42,3 +49,58 @@ def get_reserved_slots_service():
             reserved_slots.append({"date": date_str, "bookings": [booking_entry]})
 
     return reserved_slots
+
+def add_reservation_to_calendar(reserve: Reserve, db: Session) -> Dict[str, Any]:
+    """
+    Add reservation to Google Calendar
+    """
+    # Get calendar service
+    service = get_calendar_service()
+    
+    # Set timezone
+    tz = pytz.timezone("Asia/Tokyo")
+    
+
+    start_datetime = datetime.combine(reserve.date, reserve.start_time)
+    end_datetime = datetime.combine(reserve.date, reserve.end_time)
+
+    start_datetime = tz.localize(start_datetime)
+    end_datetime = tz.localize(end_datetime)
+    
+    db.refresh(reserve, ['user', 'reserve_services'])
+    
+
+    user_name = f"{reserve.user.first_name or ''} {reserve.user.last_name or ''}".strip()
+    if not user_name:
+        user_name = "お客様"
+    
+    service_names = []
+    for reserve_service in reserve.reserve_services:
+        db.refresh(reserve_service, ['service'])
+        service_names.append(reserve_service.service.service_name)
+    
+    event_title = f"{user_name} - {', '.join(service_names)}"
+    
+    event = {
+        'summary': event_title,
+        'start': {
+            'dateTime': start_datetime.isoformat(),
+            'timeZone': 'Asia/Tokyo',
+        },
+        'end': {
+            'dateTime': end_datetime.isoformat(),
+            'timeZone': 'Asia/Tokyo',
+        },
+        'description': f"予約ID: {reserve.id}\n合計時間: {reserve.total_duration}分\n合計料金: ¥{reserve.total_price:,}",
+    }
+    
+    created_event = service.events().insert(
+        calendarId=settings.business_calendar_id,
+        body=event
+    ).execute()
+    
+    return {
+        'event_id': created_event.get('id'),
+        'event_link': created_event.get('htmlLink'),
+        'event_title': event_title
+    }

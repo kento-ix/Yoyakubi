@@ -4,6 +4,7 @@ from v1.router.response_client import router as client_router
 from fastapi.middleware.cors import CORSMiddleware
 from v1.router.calendar import router as calendar_router
 from v1.router.customer_api import router as customer_router
+from v1.router.reserve import router as reserve_router
 
 from db.database import engine
 from model.orm_reservation import Base
@@ -29,6 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(calendar_router)
+app.include_router(reserve_router)
 app.include_router(client_router)
 app.include_router(customer_router)
 #app.include_router(business_router)
