@@ -14,7 +14,7 @@ const Test = () => {
         <ul>
           {selectedServices.map((service) => (
             <li key={service.id}>
-              {service.name} ({service.duration}分 / ¥{service.price})
+              {service.service_name} ({service.duration}分 / ¥{service.price})
             </li>
           ))}
         </ul>
