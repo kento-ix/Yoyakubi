@@ -41,7 +41,7 @@ const ReservationConfirm: React.FC = () => {
             endTime,
             services: selectedServices.map(service => ({
               id: service.id,
-              service_name: service.name,
+              service_name: service.service_name,
               description: service.description,
               duration: service.duration,
               price: service.price,

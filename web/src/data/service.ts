@@ -4,7 +4,7 @@ export const services: ServiceMenu[] = [
   // ハンド：ジェル
     {
       id: 'hand-gel-clear',
-      name: 'クリアジェル (ハンド)',
+      service_name: 'クリアジェル (ハンド)',
       description: '透明感のある艶仕立てで自爪を美しく保護するクリアジェル。',
       duration: 60,
       price: 5600,
@@ -13,7 +13,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-onecolor',
-      name: 'ワンカラージェル (ハンド)',
+      service_name: 'ワンカラージェル (ハンド)',
       description: '指先を美しく彩るシンプルなワンカラーネイル。上品なツヤ感が魅力。',
       duration: 120,
       price: 6000,
@@ -22,7 +22,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-lame',
-      name: 'ラメグラデーション (ハンド)',
+      service_name: 'ラメグラデーション (ハンド)',
       description: '繊細なラメが指先を華やかに演出。上品でキラキラ輝く仕上がりに。',
       duration: 75,
       price: 6000,
@@ -31,7 +31,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-french',
-      name: 'フレンチジェル (ハンド)',
+      service_name: 'フレンチジェル (ハンド)',
       description: '洗礼されたデザインで指先を美しく。シンプルで上品なフレンチネイル。',
       duration: 75,
       price: 6800,
@@ -40,7 +40,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-gel-gradation',
-      name: 'カラーグラデーション (ハンド)',
+      service_name: 'カラーグラデーション (ハンド)',
       description: '自然な色の移り変わりが魅力。指先を美しく演出する上品なデザイン。',
       duration: 75,
       price: 7000,
@@ -51,7 +51,7 @@ export const services: ServiceMenu[] = [
     // ハンド：マニキュア
     {
       id: 'hand-polish-clear',
-      name: 'クリアマニキュア (ハンド)',
+      service_name: 'クリアマニキュア (ハンド)',
       description: '透明感のある艶仕立てで自爪を美しく保護するクリアジェル。',
       duration: 60,
       price: 5600,
@@ -60,7 +60,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-polish-onecolor',
-      name: 'ワンカラーマニキュア (ハンド)',
+      service_name: 'ワンカラーマニキュア (ハンド)',
       description: '指さくを美しくシンプルなワンカラーネイル。上品なツヤ感が魅力',
       duration: 60,
       price: 5500,
@@ -69,7 +69,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'hand-polish-french',
-      name: 'フレンチマニキュア (ハンド)',
+      service_name: 'フレンチマニキュア (ハンド)',
       description: '上品で洗礼されたデザイン。オフィスや特別なシーンのもおすすめ。',
       duration: 60,
       price: 6000,
@@ -80,7 +80,7 @@ export const services: ServiceMenu[] = [
     // フットメニュー:ジェル
     {
       id: 'foot-gel-clear',
-      name: 'クリアジェル (フット)',
+      service_name: 'クリアジェル (フット)',
       description: '透明感のあるクリアジェルで、足元を自然に美しく保護。艶感がある引き立ち、上品な仕上がりに。',
       duration: 90,
       price: 6000,
@@ -89,7 +89,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-gel-onecolor',
-      name: 'ワンカラージェル (フット)',
+      service_name: 'ワンカラージェル (フット)',
       description: '足元を美しく彩るワンカラーネイル。シンプルながら華やかな仕上がり。',
       duration: 120,
       price: 6500,
@@ -98,7 +98,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-gel-french',
-      name: 'フレンチジェル (フット)',
+      service_name: 'フレンチジェル (フット)',
       description: '上品なフレンチネイルで足元をエレガントに。オフィスやお出かけにも◎',
       duration: 60,
       price: 6800,
@@ -109,7 +109,7 @@ export const services: ServiceMenu[] = [
     // フットメニュー:マニキュア
     {
       id: 'foot-polish-clear',
-      name: 'クリアマニキュア (フット)',
+      service_name: 'クリアマニキュア (フット)',
       description: '透明感のあるクリアジェルで、足元を自然に美しく保護。艶感がある引き立ち、上品な仕上がりに。',
       duration: 90,
       price: 5500,
@@ -118,7 +118,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-polish-onecolor',
-      name: 'ワンカラーマニキュア (フット)',
+      service_name: 'ワンカラーマニキュア (フット)',
       description: '足元を美しく彩るワンカラーネイル。シンプルながら華やかな仕上がり。',
       duration: 120,
       price: 6000,
@@ -127,7 +127,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'foot-polish-french',
-      name: 'フレンチマニキュア (フット)',
+      service_name: 'フレンチマニキュア (フット)',
       description: '上品なフレンチデザイン。指先を美しく際立たせ、オフィスや特別なシーンにもおすすめ。',
       duration: 60,
       price: 6500,
@@ -137,7 +137,7 @@ export const services: ServiceMenu[] = [
     // オフ
     {
       id: 'off-own-polish',
-      name: '自店マニキュアオフ',
+      service_name: '自店マニキュアオフ',
       description: '自爪に優しくマニキュアをオフ。丁寧に除去し、健康的な爪を保ちます。',
       duration: 10,
       price: 1000,
@@ -146,7 +146,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'off-other-polish',
-      name: '他店マニキュアオフ',
+      service_name: '他店マニキュアオフ',
       description: '自爪に優しくマニキュアをオフ。丁寧に除去し、健康的な爪を保ちます。',
       duration: 10,
       price: 2000,
@@ -155,7 +155,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'off-own-acrylic',
-      name: '自店アクリル/スキャルプ/ハードジェルオフ',
+      service_name: '自店アクリル/スキャルプ/ハードジェルオフ',
       description: '当店施術のアクリル、スカルプ、ハードジェルを丁寧にオフ。自爪を保護しながら優しく除去します。',
       duration: 10,
       price: 3000,
@@ -164,7 +164,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'off-other-acrylic',
-      name: '他店アクリル/スキャルプ/ハードジェルオフ',
+      service_name: '他店アクリル/スキャルプ/ハードジェルオフ',
       description: '当店施術のアクリル、スカルプ、ハードジェルを丁寧にオフ。自爪を保護しながら優しく除去します。',
       duration: 10,
       price: 3500,
@@ -173,7 +173,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'off-own-gel',
-      name: '自店ジェルオフ',
+      service_name: '自店ジェルオフ',
       description: '当店施術のジェルを丁寧にオフ。自爪を守りながら優しく除去します。',
       duration: 10,
       price: 2000,
@@ -182,7 +182,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'off-other-gel',
-      name: '他店ジェルオフ',
+      service_name: '他店ジェルオフ',
       description: '当店施術のジェルを丁寧にオフ。自爪を守りながら優しく除去します。',
       duration: 10,
       price: 3000,
@@ -193,7 +193,7 @@ export const services: ServiceMenu[] = [
     // その他
     {
       id: 'others-keratin',
-      name: '角質除去',
+      service_name: '角質除去',
       description: '足裏の硬くなった角質を丁寧にケア。ツルツルで滑らかな仕上がりに。',
       duration: 10,
       price: 1500,
@@ -202,7 +202,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'others-footcare',
-      name: 'フットケア',
+      service_name: 'フットケア',
       description: '暖かいティー天皮を整えたり、爪の形を整えたり、ネイルシェイプ10分間のローションマッサージ、ホットタオルなどのご提供いたします。スクラブをご希望の方は+500円のオプションを選択してください',
       duration: 10,
       price: 5000,
@@ -211,7 +211,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'others-handcare',
-      name: '【既存のメニューに含まれております】\nハンドケア',
+      service_name: '【既存のメニューに含まれております】\nハンドケア',
       description: '甘皮処理と爪の形を整え、健康的で美しい指先に。保護ケアでしっとりに仕上げます。',
       duration: 10,
       price: 3000,
@@ -220,7 +220,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'others-sculp',
-      name: 'スキャルプネイル長さだしワンカラーネイル',
+      service_name: 'スキャルプネイル長さだしワンカラーネイル',
       description: 'スキャルプワンカラーをやります。',
       duration: 10,
       price: 10000,
@@ -231,7 +231,7 @@ export const services: ServiceMenu[] = [
     // オプション
     {
       id: 'option-gel-off',
-      name: 'ジェルオフ',
+      service_name: 'ジェルオフ',
       description: 'ジェルネイルを丁寧にオフ。自爪を傷めず、健康的な爪を保ちながら優しく除去します。',
       duration: 15,
       price: 0,
@@ -240,7 +240,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'option-polish-off',
-      name: 'マニキュアオフ',
+      service_name: 'マニキュアオフ',
       description: '自爪に優しくマニキュアをオフ。丁寧に除去し、健康的な爪を保ちます。',
       duration: 30,
       price: 0,
@@ -249,7 +249,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'option-hard-gel-off',
-      name: 'ハードジェルオフ',
+      service_name: 'ハードジェルオフ',
       description: 'ハードジェルを丁寧にオフ。自爪を傷めず、優しく除去します。',
       duration: 45,
       price: 1000,
@@ -258,7 +258,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'option-sculp-off',
-      name: 'スカルプオフ',
+      service_name: 'スカルプオフ',
       description: 'スカルプアクリルを丁寧にオフ。自爪を傷めず、優しく除去します。',
       duration: 20,
       price: 2000,
@@ -267,7 +267,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'option-magnet-gel',
-      name: 'マグネットジェルカラー追加',
+      service_name: 'マグネットジェルカラー追加',
       description: 'マグネットジェルネイルをご利用の方は、ワンカラーとこちらを選択してくださいフレンチのカラーをマグネットにも変更できます。その場合もこちらを選択してください',
       duration: 20,
       price: 660,
@@ -276,7 +276,7 @@ export const services: ServiceMenu[] = [
     },
     {
       id: 'option-scrub',
-      name: 'スクラブ追加',
+      service_name: 'スクラブ追加',
       description: 'スカルプアクリルを丁寧にオフ。自爪を傷めず、優しく除去します。',
       duration: 20,
       price: 500,

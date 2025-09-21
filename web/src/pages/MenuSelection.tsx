@@ -134,7 +134,7 @@ const MenuSelection: React.FC = () => {
                                     >
                                         <Stack gap="sm">
                                             <div>
-                                                <Text fw={600} size="lg">{service.name}</Text>
+                                                <Text fw={600} size="lg">{service.service_name}</Text>
                                                 <Text size="sm" fw={600}>￥{service.price.toLocaleString()}</Text>
                                             </div>
                                             <Group justify="flex-end" mt="sm">
@@ -175,7 +175,7 @@ const MenuSelection: React.FC = () => {
                         >
                             <Group>
                                 <div>
-                                    <Text fw={500}>{service.name}</Text>
+                                    <Text fw={500}>{service.service_name}</Text>
                                     <Text size="sm" fw={600}>
                                         {service.price === 0 ? '' : `¥${service.price.toLocaleString()}`}
                                     </Text>
@@ -196,7 +196,7 @@ const MenuSelection: React.FC = () => {
                         <Text fw={600} c="pink.8" size="lg">選択中のサービス</Text>
                         {selectedService.map((s) => (
                             <Group key={s.id} justify="space-between">
-                                <Text>{s.name}</Text>
+                                <Text>{s.service_name}</Text>
                                 <Text fw={600}>¥{s.price.toLocaleString()}</Text>
                             </Group>
                         ))}

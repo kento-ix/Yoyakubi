@@ -1,6 +1,6 @@
 export interface ServiceMenu {
   id: string;
-  name: string;
+  service_name: string;
   description: string;
   duration: number;
   price: number;
