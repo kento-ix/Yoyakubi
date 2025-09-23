@@ -5,20 +5,18 @@ import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
 import { useAtom } from "jotai";
 import { selectedDateAtom, selectedTimeAtom } from "@/atoms/dateAtom";
 import { selectedServiceAtom } from "@/atoms/serviceAtom";
-import { lineIdAtom } from "@/atoms/customerAtom";
 import { postReserve } from "@/api/calendarApi";
 import type { ReservationData } from "@/types/confirm";
-// import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 const ReservationConfirm: React.FC = () => {
   const navigate = useNavigate();
   const [selectedDate] = useAtom(selectedDateAtom);
   const [selectedTime] = useAtom(selectedTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
-  const [line_id] = useAtom(lineIdAtom);
 
-  // const [searchParams] = useSearchParams();
-  // const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
+  const [searchParams] = useSearchParams();
+  const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
 
   // Calculate end time based on start time and total duration
   const calculateEndTime = (startTime: string, duration: number): string => {

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { lineIdAtom } from '@/atoms/customerAtom';
-import { initLiff, getUserProfile } from '@/api/liff';
 import { selectedServiceAtom, setSelectedServiceAtom } from '@/atoms/serviceAtom';
 import {
     Paper,
@@ -19,28 +17,11 @@ import {
 } from '@mantine/core';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { services } from '@/data/service';
-import { useEffect } from 'react';
 
 const MenuSelection: React.FC = () => {
     const navigate = useNavigate();
     const [selectedService] = useAtom(selectedServiceAtom);
     const [, setSelectedService] = useAtom(setSelectedServiceAtom);
-    const [lineId, setLineId] = useAtom(lineIdAtom);
-
-    useEffect(() => {
-        const setupLineId = async () => {
-            if(!lineId) {
-                try {
-                    await initLiff();
-                    const profile = await getUserProfile();
-                    setLineId(profile.userId);
-                } catch (err) {
-                    console.error("LIFF init/getProfile failed:", err);
-                }
-            }
-        };
-        setupLineId();
-    }, [lineId, setLineId]);
 
     const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
         'ジェル': false,
