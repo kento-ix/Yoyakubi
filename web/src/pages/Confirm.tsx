@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
 import { useAtom } from "jotai";
@@ -14,29 +14,22 @@ const ReservationConfirm: React.FC = () => {
   const [selectedDate] = useAtom(selectedDateAtom);
   const [selectedTime] = useAtom(selectedTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
-  const [searchParams] = useSearchParams();
   const [lineId, setLineId] = useState<string | null>(null);
 
   useEffect(() => {
-    const setupLineId = async () => {
-      const lineIdFromUrl = searchParams.get("line_id");
-      if (lineIdFromUrl) {
-        setLineId(lineIdFromUrl);
-        return;
-      }
-
+    const fetchLineId = async () => {
       try {
         await initLiff();
         const profile = await getUserProfile();
-        setLineId(profile.userId);
+        setLineId(profile.userId); // LIFF から取得した lineId をセット
       } catch (err) {
-        console.error("LIFF init or getProfile failed:", err);
-        setLineId('U665dc743d1cdb42e348a268232d2c7d6');
+        console.error("LIFF 初期化またはプロフィール取得に失敗:", err);
+        setLineId(null); // デフォルト値は設定せず null のまま
       }
     };
 
-    setupLineId();
-  }, [searchParams]);
+    fetchLineId();
+  }, []);
 
   // Calculate end time based on start time and total duration
   const calculateEndTime = (startTime: string, duration: number): string => {
@@ -47,7 +40,6 @@ const ReservationConfirm: React.FC = () => {
     return `${endHours.toString().padStart(2, "0")}:${endMins.toString().padStart(2, "0")}`;
   };
 
-  // calculate reservationData
   const reservationData: ReservationData | null =
     selectedDate && selectedTime && selectedServices.length > 0 && lineId
       ? (() => {
@@ -79,8 +71,7 @@ const ReservationConfirm: React.FC = () => {
     if (!reservationData) return;
 
     try {
-      const result = await postReserve(reservationData);
-      console.log("予約成功:", result);
+      await postReserve(reservationData);
       navigate("/complete");
     } catch (error) {
       console.error("予約失敗:", error);
@@ -103,7 +94,6 @@ const ReservationConfirm: React.FC = () => {
     <div style={{ maxWidth: 600, margin: "0 auto" }}>
       <Paper p="lg" shadow="sm" radius="md" withBorder>
         <form onSubmit={handleConfirm}>
-          {/* Hidden form inputs for reservation data */}
           <input type="hidden" name="date" value={reservationData.date} />
           <input type="hidden" name="time" value={reservationData.time} />
           <input type="hidden" name="endTime" value={reservationData.endTime} />
@@ -124,9 +114,7 @@ const ReservationConfirm: React.FC = () => {
                 <Group key={service.id} justify="space-between">
                   <div>
                     <Text fw={500}>{service.service_name}</Text>
-                    <Text size="sm" c="dimmed">
-                      {service.duration}分
-                    </Text>
+                    <Text size="sm" c="dimmed">{service.duration}分</Text>
                   </div>
                   <Text fw={600}>¥{service.price.toLocaleString()}</Text>
                 </Group>
@@ -141,9 +129,7 @@ const ReservationConfirm: React.FC = () => {
             </Group>
             <Group justify="space-between">
               <Text fw={700}>合計金額</Text>
-              <Text fw={700} c="pink.8">
-                ¥{reservationData.totalPrice.toLocaleString()}
-              </Text>
+              <Text fw={700} c="pink.8">¥{reservationData.totalPrice.toLocaleString()}</Text>
             </Group>
 
             <Divider my="sm" />
@@ -151,9 +137,7 @@ const ReservationConfirm: React.FC = () => {
             <Stack gap="xs">
               <Text fw={600} c="pink.8">予約日時</Text>
               <Text>日付: {dayjs(reservationData.date).format("YYYY年MM月DD日(ddd)")}</Text>
-              <Text>
-                時間: {reservationData.time} - {reservationData.endTime}
-              </Text>
+              <Text>時間: {reservationData.time} - {reservationData.endTime}</Text>
             </Stack>
 
             <Divider my="sm" />
@@ -162,9 +146,7 @@ const ReservationConfirm: React.FC = () => {
               <Button variant="outline" color="gray" onClick={() => navigate("/datetime")}>
                 戻る
               </Button>
-              <Button type="submit" color="pink">
-                予約を確定する
-              </Button>
+              <Button type="submit" color="pink">予約を確定する</Button>
             </Group>
           </Stack>
         </form>
