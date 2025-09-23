@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
 import { useAtom } from "jotai";
@@ -7,16 +7,36 @@ import { selectedDateAtom, selectedTimeAtom } from "@/atoms/dateAtom";
 import { selectedServiceAtom } from "@/atoms/serviceAtom";
 import { postReserve } from "@/api/calendarApi";
 import type { ReservationData } from "@/types/confirm";
-import { useSearchParams } from "react-router-dom";
+import { initLiff, getUserProfile } from "@/api/liff";
 
 const ReservationConfirm: React.FC = () => {
   const navigate = useNavigate();
   const [selectedDate] = useAtom(selectedDateAtom);
   const [selectedTime] = useAtom(selectedTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
-
   const [searchParams] = useSearchParams();
-  const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
+  const [lineId, setLineId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const setupLineId = async () => {
+      const lineIdFromUrl = searchParams.get("line_id");
+      if (lineIdFromUrl) {
+        setLineId(lineIdFromUrl);
+        return;
+      }
+
+      try {
+        await initLiff();
+        const profile = await getUserProfile();
+        setLineId(profile.userId);
+      } catch (err) {
+        console.error("LIFF init or getProfile failed:", err);
+        setLineId('U665dc743d1cdb42e348a268232d2c7d6');
+      }
+    };
+
+    setupLineId();
+  }, [searchParams]);
 
   // Calculate end time based on start time and total duration
   const calculateEndTime = (startTime: string, duration: number): string => {
@@ -29,7 +49,7 @@ const ReservationConfirm: React.FC = () => {
 
   // calculate reservationData
   const reservationData: ReservationData | null =
-    selectedDate && selectedTime && selectedServices.length > 0 && line_id
+    selectedDate && selectedTime && selectedServices.length > 0 && lineId
       ? (() => {
           const totalDuration = selectedServices.reduce((acc, service) => acc + service.duration, 0);
           const totalPrice = selectedServices.reduce((acc, service) => acc + service.price, 0);
@@ -49,7 +69,7 @@ const ReservationConfirm: React.FC = () => {
             })),
             totalDuration,
             totalPrice,
-            line_id: line_id,
+            line_id: lineId,
           };
         })()
       : null;
