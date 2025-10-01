@@ -1,6 +1,8 @@
 from linebot.models import (
     TextSendMessage,
-    TemplateSendMessage, ButtonsTemplate, URITemplateAction
+    TemplateSendMessage, ButtonsTemplate, URITemplateAction,
+    ConfirmTemplate,
+    FlexSendMessage, BubbleContainer, BoxComponent, TextComponent, ButtonComponent, URIAction
 )
 from model.orm_reservation import User, Reserve
 from db.database import SessionLocal
@@ -55,9 +57,41 @@ def flow_check_reservation(user_line_id: str, db):
 
     reservation = db.query(Reserve).filter(Reserve.user_id == user.id).first()
     if reservation:
-        return TextSendMessage(
-            text=f"現在のご予約:\n日付: {reservation.date}\nメニュー: {reservation.menu_name}"
+        service_names = ", ".join([s.service_name for s in reservation.services])
+
+        date_str = reservation.date.strftime("%m月%d日")
+        start_time_str = reservation.start_time.strftime("%H時%M分")
+        end_time_str = reservation.end_time.strftime("%H時%M分")
+
+        bubble = BubbleContainer(
+            body=BoxComponent(
+                layout="vertical",
+                contents=[
+                    TextComponent(text="ご予約内容", weight="bold", size="lg"),
+                    TextComponent(text=f"日付: {date_str}", size="sm"),
+            TextComponent(text=f"時間: {start_time_str} ~ {end_time_str}", size="sm"),
+                    TextComponent(text=f"サービス: {service_names}", size="sm"),
+                    TextComponent(text=f"合計金額: ¥{reservation.total_price}", size="sm")
+                ]
+            ),
+            footer=BoxComponent(
+                layout="vertical",
+                contents=[
+                    ButtonComponent(
+                        style="primary",
+                        height="sm",
+                        action=URIAction(label="メニュー変更", uri=MENU_URL)
+                    ),
+                    ButtonComponent(
+                        style="secondary",
+                        height="sm",
+                        action=URIAction(label="日程変更", uri=MENU_URL)
+                    )
+                ]
+            )
         )
+
+        return FlexSendMessage(alt_text="ご予約内容", contents=bubble)
     else:
         return TextSendMessage(text="現在、お客様のご予約はございません。")
 
@@ -95,3 +129,25 @@ def flow_default():
     """
 
     return TextSendMessage(text="ご要望をメニューから選択してください")
+
+
+def flow_reserve_success(user_line_id: str, db, reservation: Reserve):
+    """
+    Send reserve success description ro user
+    """
+    text = f"予約が完了しました！\n\n日付: {reservation.date}\nメニュー: {reservation.menu_name}\n店舗: {reservation.store_name}"
+    
+    confirm_template = ConfirmTemplate(
+        text=text,
+        actions=[
+            URITemplateAction(label="予約内容を見る", uri=f"{MENU_URL}"),
+            URITemplateAction(label="キャンセルする", uri=f"{MENU_URL}/cancel?reserve_id={reservation.id}")
+        ]
+    )
+    
+    template_message = TemplateSendMessage(
+        alt_text="予約詳細",
+        template=confirm_template
+    )
+    
+    return template_message

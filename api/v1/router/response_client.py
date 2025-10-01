@@ -3,8 +3,7 @@ from fastapi import APIRouter, Request, HTTPException, Depends
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
-    TemplateSendMessage, ButtonsTemplate, URITemplateAction
+    MessageEvent, TextMessage
 )
 from services.reserve_flow import (
     flow_reserve,
@@ -20,9 +19,6 @@ from model.orm_reservation import User, Reserve
 
 router = APIRouter()
 
-# test url
-REGISTER_URL = "https://yoyakubi.vercel.app/customer-form"
-MENU_URL = "https://yoyakubi.vercel.app/menu"
 
 client_line_api = LineBotApi(settings.line_client_access_token)
 handler = WebhookHandler(settings.line_client_secret)
