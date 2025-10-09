@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from '@mantine/form';
 import {
@@ -17,30 +17,30 @@ import type { CustomerForm, CustomerCreateRequest } from '@/types/customer';
 import { createCustomer } from '@/api/customerService';
 import { customerErrorAtom } from '@/atoms/customerAtom';
 import { useAtom } from 'jotai';
-import { lineIdAtom } from '@/atoms/customerAtom';
-import { initLiff, getUserProfile } from '@/api/liff';
+// import { lineIdAtom } from '@/atoms/customerAtom';
+// import { initLiff, getUserProfile } from '@/api/liff';
 
 const CustomerFormPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useAtom(customerErrorAtom);
-  const [, setLineId] = useAtom(lineIdAtom);
+  // const [, setLineId] = useAtom(lineIdAtom);
   
   const [searchParams] = useSearchParams();
   const line_id = searchParams.get('line_id') || 'U665dc743d1cdb42e348a268232d2c7d6'; 
 
-  useEffect(() => {
-    const setup = async () => {
-      try {
-        await initLiff();
-        const profile = await getUserProfile();
-        setLineId(profile.userId);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    setup();
-  }, []);
+  // useEffect(() => {
+  //   const setup = async () => {
+  //     try {
+  //       await initLiff();
+  //       const profile = await getUserProfile();
+  //       setLineId(profile.userId);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   setup();
+  // }, []);
 
   const form = useForm<CustomerForm>({
     initialValues: {
