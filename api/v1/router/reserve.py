@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from db.database import get_db
-from model.reserve_schema import ReservationCreate
+from schemas.reserve_schema import ReservationCreate
 from services.reserve_service import create_reservation_db
 from services.calendar_service import add_reservation_to_calendar
 from typing import Dict, Any

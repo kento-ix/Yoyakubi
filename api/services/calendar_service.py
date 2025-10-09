@@ -2,7 +2,7 @@ from core.google_calendar import get_calendar_service
 from core.config import settings
 from datetime import datetime, timedelta
 import pytz
-from model.orm_reservation import Reserve
+from models.orm_reservation import Reserve
 from sqlalchemy.orm import Session
 from typing import Dict, Any
 

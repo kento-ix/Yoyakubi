@@ -17,3 +17,6 @@ class ReservationCreate(BaseModel):
     totalPrice: int
     services: List[ServiceData]
     line_id: str
+
+class ReservationConfirmSchema(ReservationCreate):
+    line_id: str = None 

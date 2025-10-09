@@ -15,7 +15,7 @@ from services.reserve_flow import (
 from sqlalchemy.orm import Session
 from core.config import settings
 from db.database import get_db
-from model.orm_reservation import User, Reserve
+from models.orm_reservation import User, Reserve
 
 router = APIRouter()
 

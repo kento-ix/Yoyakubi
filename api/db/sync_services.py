@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from model.orm_reservation import Service
+from models.orm_reservation import Service
 
 services = [
     # ハンド：ジェル

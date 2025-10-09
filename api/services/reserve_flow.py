@@ -4,8 +4,7 @@ from linebot.models import (
     ConfirmTemplate,
     FlexSendMessage, BubbleContainer, BoxComponent, TextComponent, ButtonComponent, URIAction
 )
-from model.orm_reservation import User, Reserve
-from db.database import SessionLocal
+from models.orm_reservation import User, Reserve
 
 REGISTER_URL = "https://yoyakubi.vercel.app/customer-form"
 MENU_URL = "https://yoyakubi.vercel.app/menu"
@@ -69,7 +68,7 @@ def flow_check_reservation(user_line_id: str, db):
                 contents=[
                     TextComponent(text="ご予約内容", weight="bold", size="lg"),
                     TextComponent(text=f"日付: {date_str}", size="sm"),
-            TextComponent(text=f"時間: {start_time_str} ~ {end_time_str}", size="sm"),
+                    TextComponent(text=f"時間: {start_time_str} ~ {end_time_str}", size="sm"),
                     TextComponent(text=f"サービス: {service_names}", size="sm"),
                     TextComponent(text=f"合計金額: ¥{reservation.total_price}", size="sm")
                 ]

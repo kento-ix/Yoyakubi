@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from model.orm_reservation import Reserve, ReserveService, User
-from model.reserve_schema import ReservationCreate
+from models.orm_reservation import Reserve, ReserveService, User
+from schemas.reserve_schema import ReservationCreate
 from datetime import datetime
 from fastapi import HTTPException
 

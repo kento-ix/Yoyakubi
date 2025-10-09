@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from model.orm_reservation import User
-from model.customer_schema import CustomerCreate
+from models.orm_reservation import User
+from schemas.customer_schema import CustomerCreate
 
 def create_customer(db: Session, customer: CustomerCreate):
     db_user = User(

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
-from model.customer_schema import CustomerCreate
+from schemas.customer_schema import CustomerCreate
 from services.auth import create_customer, get_user_by_line_id
 
 router = APIRouter(prefix="/api/customers", tags=["customers"])

@@ -1,25 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List
 from services.calendar_service import get_reserved_slots_service
+from schemas.reserve_schema import ReservationConfirmSchema 
+
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
-class ServiceItem(BaseModel):
-    id: str
-    service_name: str
-    description: str    
-    duration: int
-    price: int
-    category: str
-
-class ReservationConfirmSchema(BaseModel):
-    date: str
-    time: str
-    endTime: str
-    totalDuration: int
-    totalPrice: int
-    services: List[ServiceItem]
 
 @router.post("/confirm", response_model=ReservationConfirmSchema)
 def confirm_reservation(data: ReservationConfirmSchema):

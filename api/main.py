@@ -7,7 +7,7 @@ from v1.router.customer_api import router as customer_router
 from v1.router.reserve import router as reserve_router
 
 from db.database import engine
-from model.orm_reservation import Base
+from models.orm_reservation import Base
 
 
 app = FastAPI()
