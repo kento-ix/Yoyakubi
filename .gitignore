@@ -18,3 +18,5 @@ api/venv
 api/google-calendar-credentials.json
 
 node_modules
+
+memo.md

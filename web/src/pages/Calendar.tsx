@@ -1,136 +1,90 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ja";
 import { useAtom } from "jotai";
 import {
-  weekStartDateAtom,
-  weekDaysAtom,
   selectedDateAtom,
   selectedTimeAtom,
   setSelectedDateTimeAtom,
 } from "@/atoms/dateAtom";
-import { Button, Group, Paper, Stack, Text } from "@mantine/core";
-import { IconChevronRight } from "@tabler/icons-react";
-import { selectedServiceAtom } from "@/atoms/serviceAtom";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { fetchReservedSlots } from "@/api/calendarApi";
 import type { ReservedSlot } from "@/types/date";
+import { Button, Card, Stack, Text, Group } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
+import { selectedServiceAtom } from "@/atoms/serviceAtom";
 
 dayjs.locale("ja");
 
-type SlotStatus = "available" | "reserved" | "preReserved" | "selected";
-
-interface CalendarProps {
-  unavailable?: (date: string, time: string) => boolean;
-}
-
-const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
-  const [weekStartDate, setWeekStartDate] = useAtom(weekStartDateAtom);
-  const [weekDays] = useAtom(weekDaysAtom);
+const Calendar: React.FC = () => {
+  const [reservedSlots, setReservedSlots] = useState<ReservedSlot[]>([]);
+  const [calendarDates, setCalendarDates] = useState<Date[]>([]);
   const [selectedDate] = useAtom(selectedDateAtom);
   const [selectedTime] = useAtom(selectedTimeAtom);
   const [, setSelectedDateTime] = useAtom(setSelectedDateTimeAtom);
   const [selectedServices] = useAtom(selectedServiceAtom);
   const navigate = useNavigate();
-  const [reservedSlots, setReservedSlots] = useState<ReservedSlot[]>([]);
 
+  // 予約データをGoogle Calendarから取得
   useEffect(() => {
     const loadReservedSlots = async () => {
       try {
-        const data = await fetchReservedSlots();
-        console.log("Response data:", data);
+        const data = await fetchReservedSlots(); // Google Calendarデータ取得API
         if (data.success) setReservedSlots(data.reserved_slots);
       } catch (err) {
-        console.error("Error in Calendar:", err);
+        console.error("予約データ取得エラー:", err);
       }
     };
-
     loadReservedSlots();
   }, []);
 
+  // 月間カレンダーの日付生成（例：当月）
+  useEffect(() => {
+    const today = dayjs();
+    const start = today.startOf("month");
+    const end = today.endOf("month");
+    const dates: Date[] = [];
+    for (let d = start; d.isBefore(end) || d.isSame(end, "day"); d = d.add(1, "day")) {
+      dates.push(d.toDate());
+    }
+    setCalendarDates(dates);
+  }, []);
 
+  // サービスの合計時間
+  const totalDuration = selectedServices.reduce((acc, s) => acc + s.duration, 0);
 
-  // get duration
-  const totalDuration = selectedServices.reduce((acc, service) => acc + service.duration, 0);
-
-  // get End time adding duration to start time
-  const calculateEndTime = (startTime: string, duration: number): string => {
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const totalMinutes = hours * 60 + minutes + duration;
-    const endHours = Math.floor(totalMinutes / 60);
-    const endMins = totalMinutes % 60;
-
-    return `${endHours.toString().padStart(2, "0")}:${endMins.toString().padStart(2, "0")}`;
+  // 選択した開始時間から終了時間を計算
+  const calcEndTime = (startTime: string, duration: number): string => {
+    const [h, m] = startTime.split(":").map(Number);
+    const total = h * 60 + m + duration;
+    const endH = Math.floor(total / 60);
+    const endM = total % 60;
+    return `${endH.toString().padStart(2, "0")}:${endM.toString().padStart(2, "0")}`;
   };
 
+  // その日が予約されている時間帯を取得
+  const getReservedTimes = (date: string): string[] => {
+    return reservedSlots
+      .filter(slot => slot.date === date)
+      .flatMap(slot => [
+        ...(slot.times || []),
+        ...(slot.bookings?.flatMap(b => b.times || []) || []),
+      ]);
+  };
 
-  const isSlotSelected = (date: Date, time: string) => {
-    if (!selectedDate || !selectedTime) return false;
-    
+  // 時間リストを作成（9:00〜18:00まで30分刻み）
+  const times = Array.from({ length: 18 }, (_, i) =>
+    dayjs().hour(9).minute(0).add(i * 30, "minute").format("HH:mm")
+  );
+
+  const handleDateSelect = (date: Date) => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
-    if (selectedDate !== dateStr) return false;
-
-    const [startHour, startMin] = selectedTime.split(":").map(Number);
-    const startTotal = startHour * 60 + startMin;
-
-    const [slotHour, slotMin] = time.split(":").map(Number);
-    const slotTotal = slotHour * 60 + slotMin;
-
-    return slotTotal >= startTotal && slotTotal < startTotal + totalDuration;
+    setSelectedDateTime({ date: dateStr, time: null });
   };
 
-  const times = Array.from({ length: 18 }, (_, i) => dayjs().hour(9).minute(0).add(i * 30, "minute").format("HH:mm"));
-
-  const handleSelect = (date: Date, time: string) => {
-    const status = getStatus(date, time);
-    
-    // Prevent selection of reserved and preReserved slots
-    if (status === "reserved" || status === "preReserved") {
-      return;
-    }
-    
-    const dateStr = dayjs(date).format("YYYY-MM-DD");
-    setSelectedDateTime({ date: dateStr, time });
+  const handleTimeSelect = (time: string) => {
+    if (!selectedDate) return;
+    setSelectedDateTime({ date: selectedDate, time });
   };
-
-  
-  const getStatus = (date: Date, time: string): SlotStatus => {
-    const dateStr = dayjs(date).format("YYYY-MM-DD");
-
-    // Get all reserved times for the date from both slot.times and booking.times
-    const reservedTimes = reservedSlots
-      .filter(slot => slot.date === dateStr)
-      .flatMap(slot => {
-        // Combine slot.times and all booking.times
-        const slotTimes = slot.times || [];
-        const bookingTimes = slot.bookings?.flatMap(booking => booking.times || []) || [];
-        return [...slotTimes, ...bookingTimes];
-      });
-
-    // Check if this specific time slot is directly reserved
-    if (reservedTimes.includes(time) || unavailable(dateStr, time)) {
-      return "reserved";
-    }
-
-    // Check if selecting this slot would conflict with existing reservations
-    const startIndex = times.indexOf(time);
-    const slotCount = Math.ceil(totalDuration / 30);
-    const range = times.slice(startIndex, startIndex + slotCount);
-
-    // If any slot in the duration range (excluding the current slot) is reserved, this is preReserved
-    if (range.some(t => t !== time && (reservedTimes.includes(t) || unavailable(dateStr, t)))) {
-      return "preReserved";
-    }
-
-    if (selectedDate === dateStr && isSlotSelected(date, time)) {
-      return "selected";
-    }
-
-    return "available";
-  };
-
-
 
   const handleNext = () => {
     if (selectedDate && selectedTime && selectedServices.length > 0) {
@@ -138,151 +92,99 @@ const Calendar: React.FC<CalendarProps> = ({ unavailable = () => false }) => {
     }
   };
 
+  // 現在選択中の日の予約済時間を取得
+  const reservedTimes = selectedDate ? getReservedTimes(selectedDate) : [];
+
   return (
-    <div style={{ width: "100%", overflowX: "hidden" }}>
+    <div style={{ padding: 16 }}>
+      <Text fw={700} fz="lg" mb="sm">
+        日付を選択
+      </Text>
 
-      <Stack justify="center" style={{ marginBottom: 15 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "#ec4881ff", color: "white", borderRadius: "50px", padding: "6px"}}>
-          <span style={{ color: "white", fontSize: 18 }}>○</span>
-          <span style={{ fontSize: 15 }}>選択可能</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "#64cf39ff", color: "white", borderRadius: "50px", padding: "6px"}}>
-          <span style={{ color: "white", fontSize: 18 }}>△</span>
-          <span style={{ fontSize: 15 }}>予約に被る可能性(予約可能)</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "#4375d9ff", color: "white", borderRadius: "50px", padding: "6px"}}>
-          <span style={{ color: "white", fontSize: 18 }}>✕</span>
-          <span style={{ fontSize: 15 }}>予約不可能</span>
-        </div>
-      </Stack>
-
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: 8 }}>
-        <div style={{ textAlign: "center", fontWeight: 500, margin: "15px", padding: "15px", backgroundColor: "#e6e6e6ff", borderRadius: "30px" }}>
-          {dayjs(weekDays[0].date).format("YYYY/MM/DD")} - {dayjs(weekDays[6].date).format("MM/DD")}
-        </div>
-
-        <Group justify="center" gap="xs" m="md">
-          <Button
-            variant="light"
-            color="pink"
-            size="sm"
-            onClick={() => setWeekStartDate(dayjs(weekStartDate).subtract(7, "day").toDate())}
-          >
-            前の1週間
-          </Button>
-          <Button
-            variant="light"
-            color="pink"
-            size="sm"
-            rightSection={<IconChevronRight size={16} />}
-            onClick={() => setWeekStartDate(dayjs(weekStartDate).add(7, "day").toDate())}
-          >
-            次の1週間
-          </Button>
-        </Group>
+      {/* 日付選択セクション */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: "6px",
+          marginBottom: "20px",
+        }}
+      >
+        {calendarDates.map((d, i) => {
+          const dateStr = dayjs(d).format("YYYY-MM-DD");
+          const isSelected = selectedDate === dateStr;
+          return (
+            <Card
+              key={i}
+              onClick={() => handleDateSelect(d)}
+              style={{
+                cursor: "pointer",
+                textAlign: "center",
+                backgroundColor: isSelected ? "#ec4881ff" : "#f5f5f5",
+                color: isSelected ? "white" : "#333",
+                padding: "10px 0",
+                borderRadius: 8,
+              }}
+            >
+              <Text>{dayjs(d).format("D")}</Text>
+              <Text fz="xs">{dayjs(d).format("ddd")}</Text>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* 時間割テーブル */}
-      <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
-        <thead>
-          <tr>
-            <th style={{ width: "16%", background: "#f5f5f5", border: "1px solid #ccc" }}>日時</th>
-            {weekDays.map((d, i) => (
-              <th
-                key={i}
-                style={{
-                  textAlign: "center",
-                  padding: 2,
-                  fontWeight: "bold",
-                  fontSize: "12px",
-                  background: d.isSunday ? "#fdecea" : d.isSaturday ? "#e3f2fd" : "#f5f5f5",
-                  border: "1px solid #ccc",
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "column", lineHeight: "2.1" }}>
-                  <span style={{ fontSize: "14px", color: d.isSunday ? "#d32f2f" : d.isSaturday ? "#1976d2" : "#333" }}>
-                    {dayjs(d.date).format("DD")}
-                  </span>
-                  <span style={{ fontSize: "11px", color: d.isSunday ? "#d32f2f" : d.isSaturday ? "#1976d2" : "#555" }}>
-                    {d.dayName}
-                  </span>
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
+      {/* 時間選択セクション */}
+      {selectedDate && (
+        <div>
+          <Text fw={700} fz="lg" mb="sm">
+            {dayjs(selectedDate).format("YYYY年MM月DD日(ddd)")}
+          </Text>
 
-        <tbody>
-          {times.map((time, row) => (
-            <tr key={row}>
-              <td style={{ width: "16%", textAlign: "center", padding: "2px", fontSize: "15px", backgroundColor: "#f0f0f0", border: "1px solid #ccc" }}>
-                {time}
-              </td>
-              {weekDays.map((d, col) => {
-                const status = getStatus(d.date, time);
-                const selected = isSlotSelected(d.date, time);
+          <Stack gap="xs">
+            {times.map((t, i) => {
+              const isReserved = reservedTimes.includes(t);
+              const isSelected = selectedTime === t;
 
-                let bg = "#ffffffff";
-                let symbol: React.ReactNode = <span style={{ color: "gray", fontSize: "21px" }}>○</span>;
+              return (
+                <Button
+                  key={i}
+                  fullWidth
+                  color={isReserved ? "gray" : isSelected ? "pink" : "pink.4"}
+                  variant={isReserved ? "outline" : isSelected ? "filled" : "light"}
+                  disabled={isReserved}
+                  onClick={() => handleTimeSelect(t)}
+                >
+                  {t}
+                  {isReserved && "（予約済）"}
+                </Button>
+              );
+            })}
+          </Stack>
+        </div>
+      )}
 
-                if (selected) {
-                  bg = "#ec4881ff";
-                  symbol = <span style={{ color: "white", fontSize: "21px" }}>○</span>;
-                } else if (status === "reserved") {
-                  bg = "#cdccccff";
-                  symbol = <span style={{ color: "black", fontSize: "21px" }}>✕</span>;
-                } else if (status === "preReserved") {
-                  bg = "#cdccccff";
-                  symbol = <span style={{ color: "black", fontSize: "21px" }}>△</span>;
-                }
-
-                return (
-                  <td
-                    key={col}
-                    onClick={() => handleSelect(d.date, time)}
-                    style={{
-                      cursor: status === "available" ? "pointer" : "not-allowed",
-                      height: 60,
-                      textAlign: "center",
-                      verticalAlign: "middle",
-                      backgroundColor: bg,
-                      color: "#dbd8d8ff",
-                      border: "1px solid #ccc",
-                      fontSize: "14px",
-                      userSelect: "none",
-                    }}
-                  >
-                    {symbol}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
+      {/* 選択中の情報表示 */}
       {selectedDate && selectedTime && (
-        <Paper p="md" mt="md" shadow="sm" radius="md" style={{ backgroundColor: "#fdecef" }}>
+        <Card mt="lg" shadow="sm" radius="md" style={{ background: "#fdecef" }}>
           <Stack gap="xs">
             <Text fw={600} c="pink.8">選択中の予約時間</Text>
             <Text>日付: {dayjs(selectedDate).format("YYYY年MM月DD日(ddd)")}</Text>
             <Text>開始時間: {selectedTime}</Text>
-            <Text>終了時間: {calculateEndTime(selectedTime, totalDuration)}</Text>
+            <Text>終了時間: {calcEndTime(selectedTime, totalDuration)}</Text>
             <Text>所要時間: {totalDuration}分</Text>
           </Stack>
-        </Paper>
+        </Card>
       )}
 
       {selectedDate && selectedTime && selectedServices.length > 0 && (
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}>
-          <Button onClick={() => navigate("/menu")} variant="outline" color="gray" size="md">
+        <Group justify="space-between" mt="md">
+          <Button onClick={() => navigate("/menu")} variant="outline" color="gray">
             戻る
           </Button>
-          <Button onClick={handleNext} color="pink" size="md">
+          <Button onClick={handleNext} color="pink">
             次へ進む
           </Button>
-        </div>
+        </Group>
       )}
     </div>
   );
