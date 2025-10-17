@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Paper, Stack, Text, Divider, Group, Button } from "@mantine/core";
@@ -54,10 +54,13 @@ const ReservationConfirm: React.FC = () => {
         })()
       : null;
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleConfirm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!reservationData) return;
 
+    setIsLoading(true);
     try {
       const result = await postReserve(reservationData);
       console.log("予約成功:", result);
@@ -65,6 +68,8 @@ const ReservationConfirm: React.FC = () => {
     } catch (error) {
       console.error("予約失敗:", error);
       alert("予約に失敗しました。もう一度お試しください。");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -142,7 +147,12 @@ const ReservationConfirm: React.FC = () => {
               <Button variant="outline" color="gray" onClick={() => navigate("/datetime")}>
                 戻る
               </Button>
-              <Button type="submit" color="pink">
+              <Button 
+                type="submit" 
+                color="pink"
+                loading={isLoading}
+                loaderProps={{ type: 'dots' }}
+              >
                 予約を確定する
               </Button>
             </Group>
