@@ -18,3 +18,10 @@ def create_customer(db: Session, customer: CustomerCreate):
 
 def get_user_by_line_id(db: Session, line_id: str):
     return db.query(User).filter(User.line_id == line_id).first()
+
+
+def check_user_exists(line_id: str, db):
+    user = db.query(User).filter(User.line_id == line_id).first()
+    if user:
+        return {"registered": True, "user_id": user.id}
+    return {"registered": False}
