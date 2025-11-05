@@ -25,3 +25,18 @@ def check_user_exists(line_id: str, db):
     if user:
         return {"registered": True, "user_id": user.id}
     return {"registered": False}
+
+def update_customer(db: Session, line_id: str, updated_data: CustomerCreate):
+    user = db.query(User).filter(User.line_id == line_id).first()
+    if not user:
+        return None
+
+    user.first_name = updated_data.firstName
+    user.last_name = updated_data.lastName
+    user.phone_number = updated_data.phone
+    user.email = updated_data.email
+    user.birthday = updated_data.birthday
+
+    db.commit()
+    db.refresh(user)
+    return user
