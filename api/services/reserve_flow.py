@@ -7,6 +7,7 @@ from linebot.models import (
 from models.orm_reservation import User, Reserve
 
 REGISTER_URL = "https://yoyakubi.vercel.app/customer-form"
+UPDATE_URL = "https://yoyakubi.vercel.app/customer-form-update"
 MENU_URL = "https://yoyakubi.vercel.app/menu"
 
 
@@ -101,8 +102,9 @@ def flow_setting(user_line_id: str, db):
     """
     user = db.query(User).filter(User.line_id == user_line_id).first()
 
+    # if user already exist update
     if user:
-        update_url_with_id = f"{REGISTER_URL}?line_id={user_line_id}"
+        update_url_with_id = f"{UPDATE_URL}?line_id={user_line_id}"
         buttons = ButtonsTemplate(
             title="ユーザー情報の更新",
             text="登録情報を修正してください",
@@ -111,7 +113,8 @@ def flow_setting(user_line_id: str, db):
             ]
         )
         return TemplateSendMessage(alt_text="ユーザー情報更新", template=buttons)
-    else:
+    # if user not exist send register page
+    else: 
         register_url_with_id = f"{REGISTER_URL}?line_id={user_line_id}"
         buttons = ButtonsTemplate(
             title="下記をタップして入力してください。",
